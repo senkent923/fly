@@ -16,7 +16,7 @@ export const FLEET = [
       { k: 'Мест', v: '162', unit: '' },
       { k: 'Ширина кресла', v: '46', unit: 'см' },
     ],
-    exteriorScale: 0.82,
+    frame: 'airliner',
     // cabin: 3-3 layout
     cabin: { rows: 9, layout: ['s', 's', 's', 'a', 's', 's', 's'], seatW: 20, seatH: 20, gap: 5 },
     seatProfile: 'economy',
@@ -36,7 +36,7 @@ export const FLEET = [
       { k: 'Мест', v: '48', unit: '' },
       { k: 'Длина места', v: '198', unit: 'см' },
     ],
-    exteriorScale: 1,
+    frame: 'airliner',
     // cabin: 1-2-1 lie-flat
     cabin: { rows: 6, layout: ['s', 'a', 's', 's', 'a', 's'], seatW: 30, seatH: 30, gap: 8 },
     seatProfile: 'business',
@@ -56,7 +56,7 @@ export const FLEET = [
       { k: 'Кают', v: '6', unit: '' },
       { k: 'Высота салона', v: '198', unit: 'см' },
     ],
-    exteriorScale: 0.7,
+    frame: 'jet',
     // cabin: private suites 1-1
     cabin: { rows: 4, layout: ['s', 'a', 's'], seatW: 46, seatH: 46, gap: 12 },
     seatProfile: 'lux',

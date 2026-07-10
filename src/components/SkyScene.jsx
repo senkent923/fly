@@ -1,9 +1,8 @@
 /**
- * Fully 2D animated sky background (replaces the video). Three moods
- * crossfade with the hero's route switcher: aurora night, deep-night
- * meridian, and a sunset horizon. Each has a hand-built airliner gliding
- * across with a contrail, drifting clouds and a star field — all SVG/CSS,
- * so it always animates and never depends on external media.
+ * 2D sky seen from the ground looking straight up. Three moods crossfade
+ * with the hero's route switcher: aurora night, night meridian and a sunset
+ * horizon. A jet passes overhead — drawn from below (belly, spread wings,
+ * nav lights) — trailing twin contrails as it crosses the sky. Pure SVG/CSS.
  */
 export default function SkyScene({ activeIndex }) {
   return (
@@ -19,8 +18,8 @@ export default function SkyScene({ activeIndex }) {
       </Scene>
 
       {/* readability overlays */}
-      <div className="absolute inset-0 z-[1] bg-black/25" />
-      <div className="absolute inset-0 z-[1] bg-gradient-to-t from-black via-black/25 to-black/45" />
+      <div className="absolute inset-0 z-[1] bg-black/20" />
+      <div className="absolute inset-0 z-[1] bg-gradient-to-t from-black via-black/25 to-black/40" />
     </div>
   )
 }
@@ -40,36 +39,31 @@ function Scene({ active, children }) {
 /* ---------------- Scene 1 — Northern lights ---------------- */
 function Aurora() {
   return (
-    <div className="absolute inset-0 bg-gradient-to-b from-[#071427] via-[#0a0f1e] to-[#050509]">
-      <Stars count={70} />
-      {/* aurora bands */}
-      <div className="absolute inset-x-0 top-[6%] h-[55%]">
+    <div className="absolute inset-0 bg-gradient-to-b from-[#081a30] via-[#0a0f1e] to-[#050509]">
+      <Stars count={90} />
+      {/* aurora curtains overhead */}
+      <div className="absolute inset-x-0 top-0 h-[70%]">
         <div
-          className="absolute left-[6%] top-0 h-full w-[42%] rounded-[50%] blur-[60px]"
+          className="absolute left-[8%] top-0 h-full w-[46%] rounded-[50%] blur-[70px]"
           style={{
             background:
-              'linear-gradient(180deg, rgba(56,232,201,0.55), rgba(122,90,248,0.25) 60%, transparent)',
-            animation: 'auroraSway 10s ease-in-out infinite',
+              'linear-gradient(180deg, rgba(56,232,201,0.5), rgba(122,90,248,0.22) 60%, transparent)',
+            animation: 'auroraSway 11s ease-in-out infinite',
           }}
         />
         <div
-          className="absolute right-[10%] top-[4%] h-full w-[38%] rounded-[50%] blur-[70px]"
+          className="absolute right-[6%] top-[3%] h-full w-[40%] rounded-[50%] blur-[80px]"
           style={{
             background:
-              'linear-gradient(180deg, rgba(245,152,242,0.5), rgba(56,150,232,0.2) 55%, transparent)',
-            animation: 'auroraSway 13s ease-in-out infinite reverse',
+              'linear-gradient(180deg, rgba(245,152,242,0.45), rgba(56,150,232,0.18) 55%, transparent)',
+            animation: 'auroraSway 14s ease-in-out infinite reverse',
           }}
         />
       </div>
-      <MoonGlow x="78%" y="20%" color="rgba(220,235,255,0.9)" />
-      <Clouds tint="rgba(180,200,230,0.12)" />
-      <PlaneLayer y="34%" dur="26s" scale={1}>
-        <Airliner body="#0d1220" trim="#e9f0ff" window="#8fe9dd" lights accent="#F598F2" />
-      </PlaneLayer>
-      <PlaneLayer y="62%" dur="38s" scale={0.5} delay="-8s">
-        <Airliner body="#0b0f1a" trim="#9fb0cc" window="#5b6b86" />
-      </PlaneLayer>
-      <Ridge color="#04060c" />
+      <MoonGlow x="74%" y="16%" size={130} color="rgba(220,235,255,0.9)" />
+      <Clouds tint="rgba(180,200,230,0.10)" />
+      <Overhead rot="46deg" scale={1.35} dur="30s" trail="rgba(210,235,255,0.6)" lit />
+      <Overhead rot="38deg" scale={0.6} dur="46s" delay="-14s" left="62%" trail="rgba(200,225,255,0.35)" />
     </div>
   )
 }
@@ -78,32 +72,11 @@ function Aurora() {
 function Meridian() {
   return (
     <div className="absolute inset-0 bg-gradient-to-b from-[#04060f] via-[#060913] to-[#02030a]">
-      <Stars count={110} />
-      <MoonGlow x="22%" y="18%" color="rgba(200,214,255,0.85)" />
-      {/* city-light grid glow near the ground */}
-      <div
-        className="absolute inset-x-0 bottom-0 h-[34%] opacity-70"
-        style={{
-          backgroundImage:
-            'linear-gradient(rgba(120,170,255,0.18) 1px, transparent 1px), linear-gradient(90deg, rgba(120,170,255,0.14) 1px, transparent 1px)',
-          backgroundSize: '64px 64px, 64px 64px',
-          maskImage: 'linear-gradient(to top, black, transparent)',
-          WebkitMaskImage: 'linear-gradient(to top, black, transparent)',
-          transform: 'perspective(400px) rotateX(60deg)',
-          transformOrigin: 'bottom',
-        }}
-      />
-      <div
-        className="absolute inset-x-0 bottom-0 h-[26%]"
-        style={{
-          background:
-            'radial-gradient(120% 90% at 50% 100%, rgba(90,140,255,0.35), transparent 70%)',
-        }}
-      />
-      <Clouds tint="rgba(120,150,220,0.08)" />
-      <PlaneLayer y="30%" dur="30s" scale={0.95}>
-        <Airliner body="#0a0e1a" trim="#cdd8ee" window="#7fa8ff" lights accent="#7a5af8" />
-      </PlaneLayer>
+      <Stars count={130} />
+      <MoonGlow x="20%" y="14%" size={110} color="rgba(200,214,255,0.85)" />
+      <Clouds tint="rgba(120,150,220,0.07)" />
+      <Overhead rot="44deg" scale={1.3} dur="34s" trail="rgba(150,185,255,0.55)" lit accent="#7a5af8" />
+      <Overhead rot="50deg" scale={0.55} dur="52s" delay="-20s" left="30%" trail="rgba(150,185,255,0.3)" />
     </div>
   )
 }
@@ -111,111 +84,95 @@ function Meridian() {
 /* ---------------- Scene 3 — Sunset horizon ---------------- */
 function Sunset() {
   return (
-    <div className="absolute inset-0 bg-gradient-to-b from-[#241a3a] via-[#7c3f74] to-[#ffb27a]">
-      <Stars count={30} opacity={0.5} area={45} />
-      {/* sun */}
-      <div
-        className="absolute left-1/2 top-[52%] h-[220px] w-[220px] -translate-x-1/2 rounded-full blur-[6px]"
-        style={{
-          background:
-            'radial-gradient(circle, #fff4d6 0%, #ffcf8a 35%, rgba(255,150,110,0.5) 60%, transparent 72%)',
-          animation: 'sunPulse 6s ease-in-out infinite',
-        }}
-      />
-      <div
-        className="absolute inset-x-0 top-[58%] h-[2px]"
-        style={{ background: 'linear-gradient(90deg, transparent, rgba(255,220,180,0.6), transparent)' }}
-      />
-      <Clouds tint="rgba(255,190,170,0.35)" big />
-      <PlaneLayer y="30%" dur="28s" scale={1}>
-        <Airliner body="#1a1226" trim="#3a2a45" window="#0f0a18" silhouette />
-      </PlaneLayer>
-      <PlaneLayer y="54%" dur="44s" scale={0.45} delay="-10s">
-        <Airliner body="#241a2e" trim="#3a2a45" window="#0f0a18" silhouette />
-      </PlaneLayer>
+    <div className="absolute inset-0 bg-gradient-to-b from-[#1c1338] via-[#5a2f63] to-[#e79a6e]">
+      <Stars count={26} opacity={0.5} area={40} />
+      <MoonGlow x="50%" y="18%" size={150} color="rgba(255,225,180,0.55)" />
+      <Clouds tint="rgba(255,190,170,0.28)" big />
+      <Overhead rot="42deg" scale={1.35} dur="32s" trail="rgba(255,235,215,0.6)" silhouette />
+      <Overhead rot="36deg" scale={0.6} dur="50s" delay="-16s" left="24%" trail="rgba(255,225,200,0.32)" silhouette />
     </div>
   )
 }
 
-/* ---------------- Shared pieces ---------------- */
-function PlaneLayer({ y, dur, scale = 1, delay = '0s', children }) {
+/* ---------------- Plane seen from below, crossing overhead ---------------- */
+function Overhead({ rot, scale = 1, dur, delay = '0s', left = '0%', trail, lit, accent = '#F598F2', silhouette }) {
   return (
     <div
-      className="absolute left-0 w-[240px]"
+      className="absolute top-0 left-0 will-change-transform"
       style={{
-        top: y,
-        transform: `scale(${scale})`,
-        animation: `flyAcross ${dur} linear ${delay} infinite`,
+        left,
+        '--fly-rot': rot,
+        '--fly-scale': scale,
+        animation: `flyDiag ${dur} linear ${delay} infinite`,
       }}
     >
-      <div style={{ animation: 'bob 7s ease-in-out infinite' }}>{children}</div>
+      <div style={{ animation: 'swayX 6s ease-in-out infinite' }}>
+        <Jet trail={trail} lit={lit} accent={accent} silhouette={silhouette} />
+      </div>
     </div>
   )
 }
 
-function Airliner({ body, trim, window: win, lights, accent, silhouette }) {
+function Jet({ trail, lit, accent, silhouette }) {
+  const body = silhouette ? '#140f1e' : '#0e131f'
+  const rim = silhouette ? '#2a2036' : 'rgba(210,224,255,0.35)'
   return (
-    <svg viewBox="0 0 240 96" className="w-full overflow-visible">
-      {/* contrail */}
-      <rect
-        x="-140"
-        y="45"
-        width="160"
-        height="4"
-        rx="2"
-        fill="url(#trail)"
-        opacity={silhouette ? 0.25 : 0.5}
-      />
+    <svg viewBox="0 0 160 340" width="160" className="overflow-visible">
       <defs>
-        <linearGradient id="trail" x1="0" y1="0" x2="1" y2="0">
-          <stop offset="0%" stopColor="#fff" stopOpacity="0" />
-          <stop offset="100%" stopColor="#fff" stopOpacity="0.7" />
+        <linearGradient id="ctrail" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor={trail} stopOpacity="0.9" />
+          <stop offset="100%" stopColor={trail} stopOpacity="0" />
         </linearGradient>
       </defs>
 
-      {/* horizontal stabiliser */}
-      <path d="M8 46 L44 42 L48 47 L18 52 Z" fill={body} />
-      {/* vertical tail fin */}
-      <path d="M12 47 L26 18 L40 22 L44 47 Z" fill={body} />
-      <path d="M20 34 L30 22 L37 25 L33 35 Z" fill={trim} opacity="0.5" />
-      {/* wing (far, swept back) */}
-      <path d="M96 52 L150 52 L120 78 L104 78 Z" fill={body} opacity="0.85" />
+      {/* twin contrails streaming from the engines, trailing behind (down) */}
+      <rect x="60" y="150" width="4" height="180" rx="2" fill="url(#ctrail)" />
+      <rect x="96" y="150" width="4" height="180" rx="2" fill="url(#ctrail)" />
+
+      {/* main wings, swept back (tips toward tail) */}
+      <path d="M74 96 L14 150 L20 158 L76 118 Z" fill={body} />
+      <path d="M86 96 L146 150 L140 158 L84 118 Z" fill={body} />
+      {/* winglets */}
+      <path d="M14 150 L10 140 L18 146 Z" fill={body} />
+      <path d="M146 150 L150 140 L142 146 Z" fill={body} />
+
+      {/* engine pods */}
+      <rect x="58" y="112" width="9" height="22" rx="4" fill={silhouette ? '#0c0912' : '#1a2030'} />
+      <rect x="93" y="112" width="9" height="22" rx="4" fill={silhouette ? '#0c0912' : '#1a2030'} />
+
       {/* fuselage */}
-      <path
-        d="M28 40 Q120 30 206 42 Q222 45 224 48 Q222 51 206 54 Q120 62 28 52 Q22 46 28 40 Z"
-        fill={body}
-      />
-      {/* nose highlight */}
-      <path d="M206 42 Q222 45 224 48 Q222 51 206 54 Q214 48 206 42 Z" fill={trim} opacity="0.4" />
-      {/* belly trim line */}
-      <path d="M40 53 Q120 60 200 52" stroke={trim} strokeWidth="1.2" fill="none" opacity="0.35" />
-      {/* cockpit windows */}
-      <path d="M198 45 Q206 44 210 47 L206 49 Q200 48 198 47 Z" fill={win} opacity="0.9" />
-      {/* window row */}
-      {!silhouette &&
-        Array.from({ length: 20 }).map((_, i) => (
-          <circle key={i} cx={62 + i * 6.6} cy={46 + (i > 15 ? (i - 15) * 0.5 : 0)} r="1.4" fill={win} opacity="0.85" />
-        ))}
-      {/* engine under wing */}
-      <ellipse cx="120" cy="60" rx="14" ry="6" fill={body} />
-      <ellipse cx="132" cy="60" rx="3" ry="5" fill={trim} opacity="0.5" />
-      {/* nav lights */}
-      {lights && (
+      <path d="M80 20 Q90 24 91 60 L92 150 Q90 168 80 172 Q70 168 68 150 L69 60 Q70 24 80 20 Z" fill={body} />
+      {/* rim highlight down the spine */}
+      <path d="M80 24 L80 168" stroke={rim} strokeWidth="1.4" />
+      {/* horizontal stabilisers near tail */}
+      <path d="M74 150 L48 172 L52 177 L76 160 Z" fill={body} />
+      <path d="M86 150 L112 172 L108 177 L84 160 Z" fill={body} />
+
+      {/* cockpit hint */}
+      {!silhouette && <ellipse cx="80" cy="34" rx="5" ry="7" fill="rgba(180,210,255,0.4)" />}
+
+      {/* aviation nav lights: red port, green starboard, white tail strobe */}
+      {lit && (
         <>
-          <circle cx="224" cy="48" r="2" fill={accent}>
-            <animate attributeName="opacity" values="0.3;1;0.3" dur="1.6s" repeatCount="indefinite" />
+          <circle cx="16" cy="150" r="3.2" fill="#ff4d4d">
+            <animate attributeName="opacity" values="0.4;1;0.4" dur="1.8s" repeatCount="indefinite" />
           </circle>
-          <circle cx="12" cy="47" r="1.8" fill="#ff5a5a" style={{ animation: 'blink 2s infinite' }} />
+          <circle cx="144" cy="150" r="3.2" fill="#49e07a">
+            <animate attributeName="opacity" values="0.4;1;0.4" dur="1.8s" repeatCount="indefinite" />
+          </circle>
+          <circle cx="80" cy="170" r="2.6" fill={accent} style={{ animation: 'blink 2.4s infinite' }} />
+          <circle cx="80" cy="30" r="2.4" fill="#fff" style={{ animation: 'blink 1.3s infinite' }} />
         </>
       )}
     </svg>
   )
 }
 
-function Stars({ count = 60, opacity = 0.9, area = 70 }) {
+/* ---------------- Shared atmosphere ---------------- */
+function Stars({ count = 60, opacity = 0.9, area = 75 }) {
   const stars = Array.from({ length: count }).map((_, i) => ({
-    left: (i * 47) % 100,
-    top: ((i * 29) % area),
+    left: (i * 53) % 100,
+    top: (i * 31) % area,
     s: (i % 3) + 1,
     d: (i % 5) + 3,
   }))
@@ -239,65 +196,52 @@ function Stars({ count = 60, opacity = 0.9, area = 70 }) {
   )
 }
 
-function MoonGlow({ x, y, color }) {
+function MoonGlow({ x, y, size = 120, color }) {
   return (
     <div
-      className="absolute h-[120px] w-[120px] rounded-full blur-[2px]"
+      className="absolute rounded-full blur-[2px]"
       style={{
         left: x,
         top: y,
-        background: `radial-gradient(circle, ${color} 0%, rgba(255,255,255,0.25) 40%, transparent 66%)`,
+        width: size,
+        height: size,
+        background: `radial-gradient(circle, ${color} 0%, rgba(255,255,255,0.22) 42%, transparent 68%)`,
       }}
     />
   )
 }
 
+/* clouds seen from below, drifting upward across the field of view */
 function Clouds({ tint, big }) {
   const rows = big
     ? [
-        { top: '46%', h: 34, dur: '60s', o: 0.9 },
-        { top: '64%', h: 26, dur: '48s', o: 0.7 },
+        { left: '12%', d: '34s', scale: 1.2, delay: '0s' },
+        { left: '62%', d: '46s', scale: 0.9, delay: '-18s' },
+        { left: '38%', d: '54s', scale: 0.7, delay: '-30s' },
       ]
     : [
-        { top: '20%', h: 20, dur: '80s', o: 0.6 },
-        { top: '44%', h: 26, dur: '64s', o: 0.5 },
-        { top: '70%', h: 22, dur: '52s', o: 0.4 },
+        { left: '18%', d: '52s', scale: 1, delay: '0s' },
+        { left: '68%', d: '64s', scale: 0.75, delay: '-24s' },
+        { left: '44%', d: '80s', scale: 0.55, delay: '-40s' },
       ]
   return (
     <div className="absolute inset-0 overflow-hidden">
       {rows.map((r, i) => (
         <div
           key={i}
-          className="absolute left-0 flex w-[220%] items-center"
-          style={{ top: r.top, opacity: r.o, animation: `cloudPan ${r.dur} linear infinite` }}
+          className="absolute top-0"
+          style={{ left: r.left, '--d-scale': r.scale, animation: `driftUp ${r.d} linear ${r.delay} infinite` }}
         >
-          {[0, 1].map((k) => (
-            <svg key={k} viewBox="0 0 300 60" className="w-1/2 shrink-0" style={{ height: r.h * 3 }}>
-              <g fill={tint}>
-                <ellipse cx="60" cy="40" rx="60" ry="18" />
-                <ellipse cx="120" cy="32" rx="46" ry="22" />
-                <ellipse cx="180" cy="40" rx="70" ry="16" />
-                <ellipse cx="240" cy="36" rx="40" ry="18" />
-              </g>
-            </svg>
-          ))}
+          <svg viewBox="0 0 300 90" width="300" style={{ filter: 'blur(2px)' }}>
+            <g fill={tint}>
+              <ellipse cx="70" cy="60" rx="66" ry="20" />
+              <ellipse cx="140" cy="48" rx="52" ry="26" />
+              <ellipse cx="210" cy="58" rx="74" ry="18" />
+              <ellipse cx="250" cy="52" rx="40" ry="20" />
+            </g>
+          </svg>
         </div>
       ))}
     </div>
-  )
-}
-
-function Ridge({ color }) {
-  return (
-    <svg
-      viewBox="0 0 1440 200"
-      preserveAspectRatio="none"
-      className="absolute inset-x-0 bottom-0 h-[22%] w-full"
-    >
-      <path
-        d="M0 200 V120 L120 90 L260 130 L400 70 L560 120 L720 60 L900 120 L1080 80 L1260 130 L1440 90 V200 Z"
-        fill={color}
-      />
-    </svg>
   )
 }
