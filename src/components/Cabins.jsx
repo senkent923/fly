@@ -46,13 +46,13 @@ function CabinCard({ c, index }) {
       style={{ animationDelay: `${index * 0.1}s` }}
       className={`reveal-up ${
         visible ? 'is-visible' : ''
-      } group flex flex-col justify-between rounded-2xl border border-white/10 p-8 transition-colors duration-500 hover:border-white/30`}
+      } glow-card group flex flex-col justify-between rounded-2xl border border-white/10 bg-white/[0.015] p-8 transition-all duration-500 hover:-translate-y-1.5 hover:bg-white/[0.03]`}
     >
       <div className="mb-16 flex items-start justify-between">
         <span className="text-xs font-medium uppercase tracking-[0.2em] text-white/40">
           {c.detail}
         </span>
-        <span className="text-sm font-medium text-white/30 transition-colors duration-500 group-hover:text-[var(--accent)]">
+        <span className="text-5xl font-medium leading-none text-white/10 transition-colors duration-500 group-hover:text-[var(--accent)]">
           {c.n}
         </span>
       </div>
@@ -61,6 +61,9 @@ function CabinCard({ c, index }) {
         <p className="text-base font-medium leading-6 tracking-[-0.16px] text-white/60">
           {c.desc}
         </p>
+        <span className="mt-6 flex items-center gap-2 text-xs font-medium uppercase tracking-[0.14em] text-white/0 transition-all duration-500 group-hover:text-[var(--accent)]">
+          Подробнее →
+        </span>
       </div>
     </article>
   )

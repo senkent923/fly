@@ -13,6 +13,9 @@ export default function AnimatedBackdrop({ activeIndex }) {
       {/* fine star field shared across scenes */}
       <Stars />
 
+      {/* recurring flight contrails — always-visible motion */}
+      <Contrails />
+
       {/* subtle film grain / vignette to sit type on */}
       <div className="absolute inset-0 bg-[radial-gradient(120%_100%_at_50%_0%,transparent_35%,rgba(0,0,0,0.55)_100%)]" />
     </div>
@@ -120,6 +123,33 @@ function Tunnel({ active }) {
         }}
       />
     </Scene>
+  )
+}
+
+/* recurring light streaks evoking a plane's contrail */
+function Contrails() {
+  const streaks = [
+    { top: '18%', delay: '0s', dur: '11s', w: '46vw' },
+    { top: '46%', delay: '5s', dur: '14s', w: '38vw' },
+    { top: '72%', delay: '9s', dur: '12s', w: '52vw' },
+  ]
+  return (
+    <div className="absolute inset-0 overflow-hidden">
+      {streaks.map((s, i) => (
+        <span
+          key={i}
+          className="absolute left-0 h-px rounded-full"
+          style={{
+            top: s.top,
+            width: s.w,
+            background:
+              'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.15) 40%, rgba(255,255,255,0.85) 92%, #fff 100%)',
+            boxShadow: '0 0 8px rgba(255,255,255,0.6)',
+            animation: `contrail ${s.dur} linear ${s.delay} infinite`,
+          }}
+        />
+      ))}
+    </div>
   )
 }
 

@@ -30,10 +30,30 @@ function useHubClock() {
 export default function Navbar() {
   const time = useHubClock()
   const [open, setOpen] = useState(false)
+  const [scrolled, setScrolled] = useState(false)
+
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 40)
+    onScroll()
+    window.addEventListener('scroll', onScroll, { passive: true })
+    return () => window.removeEventListener('scroll', onScroll)
+  }, [])
 
   return (
-    <header className="absolute inset-x-0 top-0 z-10">
-      <div className="mx-auto flex max-w-[1340px] items-center justify-between px-[15px] py-9 md-tablet:px-[18px] md-tablet:py-[30px] mobile:px-[18px] mobile:py-6">
+    <header
+      className={`fixed inset-x-0 top-0 z-40 transition-colors duration-500 ${
+        scrolled || open
+          ? 'border-b border-white/10 bg-black/70 backdrop-blur-xl'
+          : 'border-b border-transparent'
+      }`}
+    >
+      <div
+        className={`mx-auto flex max-w-[1340px] items-center justify-between px-[15px] transition-all duration-500 md-tablet:px-[18px] mobile:px-[18px] ${
+          scrolled
+            ? 'py-4 md-tablet:py-4 mobile:py-4'
+            : 'py-9 md-tablet:py-[30px] mobile:py-6'
+        }`}
+      >
         {/* Wordmark */}
         <a
           href="#top"

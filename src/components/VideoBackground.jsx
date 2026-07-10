@@ -1,58 +1,63 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { SCENES } from '../data'
 import AnimatedBackdrop from './AnimatedBackdrop'
 
 /**
  * Stacks all scene videos absolutely and crossfades to the active one.
- * On mount every clip is fetched as a blob and swapped to an object URL so
- * switching is instant with no network stall. A pure-CSS animated backdrop
- * sits underneath so there is always motion even if the videos never load.
+ *
+ * We stream the videos directly (no blob swap): swapping a video's `src`
+ * after it has started aborts autoplay on iOS and freezes it on a single
+ * frame. Instead each clip is played programmatically while muted, which
+ * iOS permits without a user gesture.
+ *
+ * If autoplay is still refused (e.g. iOS Low Power Mode), every video is
+ * kept hidden and the pure-CSS AnimatedBackdrop shows through — so the hero
+ * is animated no matter what.
  */
 export default function VideoBackground({ activeIndex }) {
-  const [sources, setSources] = useState(() => SCENES.map((s) => s.video))
+  const refs = useRef([])
+  const [playing, setPlaying] = useState(false)
 
+  const tryPlay = useCallback(
+    (i) => {
+      const el = refs.current[i]
+      if (!el) return
+      el.muted = true // iOS needs this as a property, not just an attribute
+      const p = el.play()
+      if (p && typeof p.then === 'function') {
+        p.then(() => setPlaying(true)).catch(() => setPlaying(false))
+      }
+    },
+    [],
+  )
+
+  // (Re)start the active clip whenever the selection changes.
   useEffect(() => {
-    let cancelled = false
-    const created = []
+    tryPlay(activeIndex)
+  }, [activeIndex, tryPlay])
 
-    Promise.all(
-      SCENES.map(async (scene) => {
-        try {
-          const res = await fetch(scene.video)
-          if (!res.ok) throw new Error('bad response')
-          const blob = await res.blob()
-          const url = URL.createObjectURL(blob)
-          created.push(url)
-          return url
-        } catch {
-          return scene.video // graceful fallback to the original URL
-        }
-      }),
-    ).then((resolved) => {
-      if (!cancelled) setSources(resolved)
-    })
-
-    return () => {
-      cancelled = true
-      created.forEach((url) => URL.revokeObjectURL(url))
-    }
-  }, [])
+  const showVideo = playing
 
   return (
     <div className="absolute inset-0 overflow-hidden bg-black" aria-hidden="true">
-      {/* always-on animated base */}
+      {/* always-on animated base — visible until (and unless) a video plays */}
       <AnimatedBackdrop activeIndex={activeIndex} />
 
-      {sources.map((src, i) => (
+      {SCENES.map((scene, i) => (
         <video
-          key={SCENES[i].id}
-          src={src}
+          key={scene.id}
+          ref={(el) => (refs.current[i] = el)}
+          src={scene.video}
           autoPlay
           muted
           loop
           playsInline
+          preload="auto"
+          onCanPlay={() => {
+            if (i === activeIndex) tryPlay(i)
+          }}
           className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-[1200ms] ease-in-out ${
-            i === activeIndex ? 'opacity-100' : 'opacity-0'
+            i === activeIndex && showVideo ? 'opacity-100' : 'opacity-0'
           }`}
         />
       ))}

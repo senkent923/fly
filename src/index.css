@@ -5,11 +5,17 @@
 :root {
   --ease-spring: cubic-bezier(0.16, 1, 0.3, 1);
   --accent: #f598f2;
+  --accent-2: #7a5af8;
+  --accent-3: #38e8c9;
 }
 
 * {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+html {
+  scroll-behavior: smooth;
 }
 
 html,
@@ -24,6 +30,50 @@ body {
   color: #fff;
   font-family: 'Figtree', system-ui, sans-serif;
   overflow-x: hidden;
+}
+
+::selection {
+  background: var(--accent);
+  color: #000;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 9px;
+}
+::-webkit-scrollbar-track {
+  background: #000;
+}
+::-webkit-scrollbar-thumb {
+  background: #2a2a2a;
+  border-radius: 999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--accent);
+}
+
+/* Fine film grain, sits above everything, ignores pointer */
+.grain::after {
+  content: '';
+  position: fixed;
+  inset: -50%;
+  z-index: 60;
+  pointer-events: none;
+  opacity: 0.04;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  animation: grainShift 0.6s steps(2) infinite;
+}
+
+@keyframes grainShift {
+  0% {
+    transform: translate(0, 0);
+  }
+  50% {
+    transform: translate(-2%, 1%);
+  }
+  100% {
+    transform: translate(1%, -2%);
+  }
 }
 
 /* ---------- Keyframes ---------- */
@@ -160,6 +210,140 @@ body {
   50% {
     filter: hue-rotate(24deg);
   }
+}
+
+@keyframes contrail {
+  0% {
+    transform: translate3d(-30vw, 60vh, 0) rotate(-24deg);
+    opacity: 0;
+  }
+  8% {
+    opacity: 0.8;
+  }
+  60% {
+    opacity: 0.8;
+  }
+  100% {
+    transform: translate3d(120vw, -30vh, 0) rotate(-24deg);
+    opacity: 0;
+  }
+}
+
+@keyframes floatY {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+@keyframes drawLine {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes planeFly {
+  to {
+    offset-distance: 100%;
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+@keyframes scrollHint {
+  0% {
+    transform: translateY(0);
+    opacity: 0;
+  }
+  40% {
+    opacity: 1;
+  }
+  80% {
+    transform: translateY(9px);
+    opacity: 0;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes borderSpin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ---------- Extra utilities ---------- */
+.float-slow {
+  animation: floatY 6s ease-in-out infinite;
+}
+
+/* Gradient/shimmer headline text */
+.text-shimmer {
+  background: linear-gradient(
+    100deg,
+    rgba(255, 255, 255, 0.55) 20%,
+    #fff 40%,
+    var(--accent) 50%,
+    #fff 60%,
+    rgba(255, 255, 255, 0.55) 80%
+  );
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: shimmer 6s linear infinite;
+}
+
+/* Character reveal used for headline words */
+.word-reveal {
+  display: inline-block;
+  opacity: 0;
+  transform: translateY(0.5em);
+}
+.word-reveal.is-visible {
+  animation: revealUp 0.8s var(--ease-spring) forwards;
+}
+
+/* Animated glow ring border for feature cards */
+.glow-card {
+  position: relative;
+  isolation: isolate;
+}
+.glow-card::before {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  z-index: -1;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(
+    130deg,
+    rgba(255, 255, 255, 0.18),
+    transparent 30%,
+    transparent 70%,
+    var(--accent)
+  );
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  opacity: 0.5;
+  transition: opacity 0.5s var(--ease-spring);
+}
+.glow-card:hover::before {
+  opacity: 1;
 }
 
 /* ---------- Reveal helpers ---------- */
