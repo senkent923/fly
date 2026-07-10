@@ -1,6 +1,9 @@
 import { ArrowUpRight } from 'lucide-react'
 import { DESTINATIONS } from '../data'
 import { useReveal } from '../hooks/useReveal'
+import { useApp } from '../store/AppContext'
+
+const today = new Date().toISOString().slice(0, 10)
 
 export default function Destinations() {
   const [headRef, headVisible] = useReveal(0.35)
@@ -40,15 +43,19 @@ export default function Destinations() {
 
 function DestinationRow({ d, index }) {
   const [ref, visible] = useReveal(0.5)
+  const { startBooking } = useApp()
   return (
     <li
       ref={ref}
       style={{ animationDelay: `${index * 0.05}s` }}
       className={`reveal-up ${visible ? 'is-visible' : ''}`}
     >
-      <a
-        href="#book"
-        className="group relative grid grid-cols-[80px_1fr_auto_auto] items-center gap-6 overflow-hidden border-b border-white/10 py-7 mobile:grid-cols-[52px_1fr_auto] mobile:gap-3"
+      <button
+        type="button"
+        onClick={() =>
+          startBooking({ fromCode: 'SVO', toCode: d.code, date: today, pax: 1 })
+        }
+        className="group relative grid w-full grid-cols-[80px_1fr_auto_auto] items-center gap-6 overflow-hidden border-b border-white/10 py-7 text-left mobile:grid-cols-[52px_1fr_auto] mobile:gap-3"
       >
         {/* hover sweep */}
         <span className="pointer-events-none absolute inset-0 -z-0 origin-left scale-x-0 bg-gradient-to-r from-white/[0.06] to-transparent transition-transform duration-700 ease-[var(--ease-spring)] group-hover:scale-x-100" />
@@ -69,7 +76,7 @@ function DestinationRow({ d, index }) {
             className="transition-transform duration-500 group-hover:translate-x-1 group-hover:-translate-y-1 group-hover:text-[var(--accent)]"
           />
         </span>
-      </a>
+      </button>
     </li>
   )
 }

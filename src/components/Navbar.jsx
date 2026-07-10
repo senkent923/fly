@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
-import { Menu, X } from 'lucide-react'
+import { Menu, X, User } from 'lucide-react'
+import { useApp } from '../store/AppContext'
 
 const NAV_ITEMS = [
   { n: '01', label: 'Маршруты', href: '#routes' },
@@ -29,6 +30,7 @@ function useHubClock() {
 
 export default function Navbar() {
   const time = useHubClock()
+  const { isAuthed, user, openAuth, openAccount } = useApp()
   const [open, setOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
 
@@ -83,20 +85,44 @@ export default function Navbar() {
           ))}
         </nav>
 
-        {/* Right cluster: contact + clock (desktop) */}
-        <div className="flex flex-col items-end gap-0.5 mobile:hidden">
-          <a
-            href="mailto:concierge@flyaether.ru"
-            className="nav-link-underline text-xs font-medium leading-4 tracking-[-0.12px]"
-          >
-            concierge@flyaether.ru
-          </a>
-          <span
-            className="text-[8px] font-medium uppercase leading-3 tracking-[0.18em] opacity-60"
-            aria-label={`Московское время ${time}`}
-          >
-            МСК {time}
-          </span>
+        {/* Right cluster: contact + clock + account (desktop) */}
+        <div className="flex items-center gap-5 mobile:hidden">
+          <div className="flex flex-col items-end gap-0.5">
+            <a
+              href="mailto:concierge@flyaether.ru"
+              className="nav-link-underline text-xs font-medium leading-4 tracking-[-0.12px]"
+            >
+              concierge@flyaether.ru
+            </a>
+            <span
+              className="text-[8px] font-medium uppercase leading-3 tracking-[0.18em] opacity-60"
+              aria-label={`Московское время ${time}`}
+            >
+              МСК {time}
+            </span>
+          </div>
+          {isAuthed ? (
+            <button
+              type="button"
+              onClick={openAccount}
+              className="flex items-center gap-2 rounded-full border border-white/15 py-1.5 pl-1.5 pr-3.5 transition-colors hover:border-white/40"
+            >
+              <span className="flex h-6 w-6 items-center justify-center rounded-full bg-gradient-to-br from-[var(--accent)] to-[var(--accent-2)] text-[11px] font-semibold text-black">
+                {(user.name || user.email)[0].toUpperCase()}
+              </span>
+              <span className="max-w-[90px] truncate text-xs font-medium">
+                {user.name || 'Кабинет'}
+              </span>
+            </button>
+          ) : (
+            <button
+              type="button"
+              onClick={openAuth}
+              className="flex items-center gap-2 rounded-full border border-white/20 px-4 py-2 text-xs font-medium transition-colors hover:border-[var(--accent)] hover:text-[var(--accent)]"
+            >
+              <User size={14} /> Войти
+            </button>
+          )}
         </div>
 
         {/* Mobile toggle */}
@@ -134,6 +160,17 @@ export default function Navbar() {
                 {item.label}
               </a>
             ))}
+            <button
+              type="button"
+              onClick={() => {
+                setOpen(false)
+                isAuthed ? openAccount() : openAuth()
+              }}
+              className="mt-2 flex w-fit items-center gap-2 rounded-full border border-white/25 px-5 py-2.5 text-sm font-medium"
+            >
+              <User size={15} />
+              {isAuthed ? user.name || 'Личный кабинет' : 'Войти / Регистрация'}
+            </button>
             <div className="mt-4 flex flex-col gap-1 text-xs">
               <a href="mailto:concierge@flyaether.ru">concierge@flyaether.ru</a>
               <span className="opacity-60">МСК {time}</span>

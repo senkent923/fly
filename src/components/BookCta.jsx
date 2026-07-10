@@ -6,9 +6,8 @@ export default function BookCta() {
 
   return (
     <section
-      id="book"
-      className="mx-auto max-w-[1340px] px-[15px] py-[150px] mobile:px-[18px] mobile:py-[100px]"
-      aria-label="Бронирование"
+      className="mx-auto max-w-[1340px] px-[15px] pt-[150px] mobile:px-[18px] mobile:pt-[100px]"
+      aria-label="Приглашение"
     >
       <div className="mb-14 text-center">
         <span className="mb-6 inline-flex items-center gap-2 text-xs font-medium uppercase tracking-[0.2em] text-white/50">
