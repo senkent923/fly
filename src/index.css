@@ -1,0 +1,191 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --ease-spring: cubic-bezier(0.16, 1, 0.3, 1);
+  --accent: #f598f2;
+}
+
+* {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background: #000;
+  color: #fff;
+  font-family: 'Figtree', system-ui, sans-serif;
+  overflow-x: hidden;
+}
+
+/* ---------- Keyframes ---------- */
+@keyframes videoFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes revealUp {
+  from {
+    opacity: 0;
+    transform: translateY(80px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes revealRight {
+  from {
+    opacity: 0;
+    transform: translateX(100px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes revealLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-60px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes dotPulse {
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.45;
+    transform: scale(1.45);
+  }
+}
+
+@keyframes marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+/* ---------- Reveal helpers ---------- */
+.reveal-up {
+  opacity: 0;
+}
+.reveal-up.is-visible {
+  animation: revealUp 0.9s var(--ease-spring) forwards;
+}
+
+.reveal-right {
+  opacity: 0;
+}
+.reveal-right.is-visible {
+  animation: revealRight 0.9s var(--ease-spring) forwards;
+}
+
+.reveal-left {
+  opacity: 0;
+}
+.reveal-left.is-visible {
+  animation: revealLeft 0.9s var(--ease-spring) forwards;
+}
+
+.dot-pulse {
+  animation: dotPulse 1.6s ease-in-out infinite;
+}
+
+/* ---------- Nav underline effect ---------- */
+.nav-link-underline {
+  position: relative;
+}
+.nav-link-underline::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: -2px;
+  width: 100%;
+  height: 1px;
+  background: currentColor;
+  transform: scaleX(0);
+  transform-origin: right;
+  transition: transform 0.45s var(--ease-spring);
+}
+.nav-link-underline:hover::after {
+  transform: scaleX(1);
+  transform-origin: left;
+}
+
+/* ---------- Role / switcher link ---------- */
+.role-link {
+  transition: transform 0.4s var(--ease-spring), opacity 0.4s var(--ease-spring);
+}
+.role-link:hover {
+  transform: translateX(4px);
+}
+
+/* ---------- Fill-up button ---------- */
+.fill-btn {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  transition: color 0.5s var(--ease-spring), border-color 0.5s var(--ease-spring);
+}
+.fill-btn::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: var(--accent);
+  transform: translateY(101%);
+  transition: transform 0.5s var(--ease-spring);
+}
+.fill-btn:hover {
+  color: #000;
+  border-color: var(--accent);
+}
+.fill-btn:hover::before {
+  transform: translateY(0);
+}
+
+/* ---------- Marquee ---------- */
+.marquee-track {
+  animation: marquee 34s linear infinite;
+}
+
+/* ---------- Reduced motion ---------- */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+  .reveal-up,
+  .reveal-right,
+  .reveal-left {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+}
