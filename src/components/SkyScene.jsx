@@ -125,10 +125,21 @@ function Jet({ trail, lit, accent, silhouette }) {
   const rim = silhouette ? 'rgba(120,95,150,0.7)' : 'rgba(200,220,255,0.5)'
   const dark = silhouette ? '#0b0812' : '#161c2b'
   return (
-    <svg viewBox="0 0 160 350" width="150" className="overflow-visible" style={{ animation: 'bankRoll 9s ease-in-out infinite' }}>
+    <svg
+      viewBox="0 0 160 350"
+      width="150"
+      className="overflow-visible"
+      style={{
+        animation: 'bankRoll 9s ease-in-out infinite',
+        filter: silhouette
+          ? 'drop-shadow(0 0 6px rgba(255,210,170,0.25))'
+          : 'drop-shadow(0 0 6px rgba(180,205,255,0.32))',
+      }}
+    >
       <defs>
         <linearGradient id={`ctrail-${uid}`} x1="0" y1="0" x2="0" y2="1">
           <stop offset="0%" stopColor={trail} stopOpacity="0.9" />
+          <stop offset="55%" stopColor={trail} stopOpacity="0.35" />
           <stop offset="100%" stopColor={trail} stopOpacity="0" />
         </linearGradient>
         <linearGradient id={`body-${uid}`} x1="0" y1="0" x2="1" y2="0">

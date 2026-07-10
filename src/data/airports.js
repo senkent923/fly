@@ -18,9 +18,9 @@ export const AIRPORTS = [
 ]
 
 export const CLASSES = [
-  { id: 'economy', label: 'Эконом', mult: 1 },
-  { id: 'business', label: 'Бизнес', mult: 2.4 },
-  { id: 'first', label: 'Первый', mult: 3.9 },
+  { id: 'economy', label: 'Стандарт', mult: 1 },
+  { id: 'business', label: 'Бизнес', mult: 1.85 },
+  { id: 'first', label: 'Приват', mult: 2.9 },
 ]
 
 export function findAirport(code) {
@@ -53,9 +53,11 @@ export function flightDuration(km) {
   return { hours, label: `${h} ч ${m.toString().padStart(2, '0')} м` }
 }
 
-// Base economy fare from distance, then class multiplier and passenger count.
+// Per-seat fare priced on flight hours, calibrated to real premium
+// private-aviation levels (charter-grade, split across the cabin).
 export function basePrice(km) {
-  return Math.round((km * 6.2 + 2500) / 100) * 100
+  const hours = km / 815 + 0.6
+  return Math.round((hours * 55000 + 30000) / 1000) * 1000
 }
 
 // Round trips price both legs at a ~5% return discount, like real fares.
@@ -64,7 +66,7 @@ export const ROUND_TRIP_FACTOR = 1.9
 export function priceFor(km, classId, pax = 1, round = false) {
   const cls = CLASSES.find((c) => c.id === classId) || CLASSES[0]
   const legs = round ? ROUND_TRIP_FACTOR : 1
-  return Math.round((basePrice(km) * cls.mult * pax * legs) / 100) * 100
+  return Math.round((basePrice(km) * cls.mult * pax * legs) / 1000) * 1000
 }
 
 export function formatRub(n) {
