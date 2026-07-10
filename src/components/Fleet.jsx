@@ -3,6 +3,7 @@ import { ArrowUpRight, Eye, Plane } from 'lucide-react'
 import { FLEET } from '../data/fleet'
 import { useReveal } from '../hooks/useReveal'
 import { useApp } from '../store/AppContext'
+import AircraftArt from './AircraftArt'
 
 const today = new Date().toISOString().slice(0, 10)
 
@@ -142,7 +143,7 @@ export default function Fleet() {
                   className="group w-full"
                   title="Показать салон"
                 >
-                  <AircraftSide frame={ac.frame} accent={ac.accent} />
+                  <AircraftArt frame={ac.frame} accent={ac.accent} />
                 </button>
               ) : (
                 <SeatMap cabin={ac.cabin} accent={ac.accent} tier={ac.tier} />
@@ -155,103 +156,6 @@ export default function Fleet() {
   )
 }
 
-/* ---------- Exterior: realistic side profile ---------- */
-function AircraftSide({ frame, accent }) {
-  const gid = `body-${frame}`
-  return (
-    <svg
-      viewBox="0 0 360 170"
-      className="mx-auto w-full max-w-[560px] overflow-visible transition-transform duration-500 group-hover:scale-[1.03]"
-    >
-      <defs>
-        <linearGradient id={gid} x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#f6f8fc" />
-          <stop offset="52%" stopColor="#ccd4e3" />
-          <stop offset="100%" stopColor="#828da3" />
-        </linearGradient>
-      </defs>
-      {frame === 'jet' ? <BizJet gid={gid} accent={accent} /> : <Airliner gid={gid} accent={accent} />}
-      {/* ground shadow */}
-      <ellipse cx="185" cy="158" rx="120" ry="7" fill="#000" opacity="0.28" />
-    </svg>
-  )
-}
-
-/* Conventional airliner (A320/A321-style): under-wing engines, swept fin */
-function Airliner({ gid, accent }) {
-  const url = `url(#${gid})`
-  return (
-    <g>
-      {/* vertical stabiliser (tail fin) at left */}
-      <path d="M40 78 L58 26 L82 30 L74 80 Z" fill={url} />
-      <path d="M52 44 L64 34 L72 37 L66 50 Z" fill={accent} opacity="0.5" />
-      {/* horizontal stabiliser */}
-      <path d="M52 84 L16 72 L20 86 L58 92 Z" fill={url} />
-      {/* far wing hint */}
-      <path d="M196 96 L150 118 L164 118 L214 100 Z" fill="#9aa6bc" opacity="0.55" />
-      {/* fuselage */}
-      <path
-        d="M44 92 Q50 70 84 68 L286 66 Q322 68 336 84 Q322 98 286 100 L84 100 Q50 100 44 92 Z"
-        fill={url}
-      />
-      {/* nose cap */}
-      <path d="M322 76 Q338 84 322 92 Q330 84 322 76 Z" fill="#eef2f8" />
-      {/* cockpit windows */}
-      <path d="M300 76 Q314 77 320 82 L314 86 Q304 85 300 83 Z" fill="#28324a" />
-      {/* window row */}
-      {Array.from({ length: 26 }).map((_, i) => (
-        <circle key={i} cx={96 + i * 8} cy="82" r="2" fill="#28324a" opacity="0.8" />
-      ))}
-      {/* cheatline */}
-      <path d="M60 90 L320 88" stroke={accent} strokeWidth="3" opacity="0.85" />
-      {/* near wing + engine */}
-      <path d="M188 96 L150 132 L168 132 L214 100 Z" fill={url} />
-      <g>
-        <ellipse cx="176" cy="116" rx="17" ry="8" fill="#3a4256" />
-        <ellipse cx="190" cy="116" rx="4" ry="6" fill="#20283a" />
-      </g>
-    </g>
-  )
-}
-
-/* Business jet (Gulfstream G650-style): aft-fuselage engines, T-tail,
-   oval windows, winglet — redrawn from the real jet's silhouette. */
-function BizJet({ gid, accent }) {
-  const url = `url(#${gid})`
-  return (
-    <g>
-      {/* T-tail: vertical fin at left */}
-      <path d="M44 84 L60 26 L74 28 L72 84 Z" fill={url} />
-      {/* horizontal stabiliser mounted on TOP of the fin */}
-      <path d="M40 30 L8 22 L12 32 L56 36 Z" fill={url} />
-      {/* far wing hint */}
-      <path d="M210 96 L168 120 L180 120 L226 100 Z" fill="#9aa6bc" opacity="0.5" />
-      {/* slender fuselage with a slightly drooped nose */}
-      <path
-        d="M52 88 Q58 70 92 68 L280 66 Q318 67 340 82 Q343 85 340 88 Q318 96 280 96 L92 96 Q58 98 52 88 Z"
-        fill={url}
-      />
-      {/* drooped nose cap */}
-      <path d="M326 78 Q344 84 330 93 Q336 85 326 80 Z" fill="#eef2f8" />
-      {/* cockpit */}
-      <path d="M300 74 Q316 75 324 81 L318 86 Q306 84 300 82 Z" fill="#26304a" />
-      {/* signature oval windows */}
-      {Array.from({ length: 8 }).map((_, i) => (
-        <ellipse key={i} cx={132 + i * 20} cy="80" rx="6" ry="4.5" fill="#26304a" opacity="0.85" />
-      ))}
-      {/* Gulfstream cheatline sweeping up toward the tail */}
-      <path d="M70 90 Q200 88 300 84 L316 82" stroke={accent} strokeWidth="3" fill="none" opacity="0.9" />
-      {/* aft-mounted engine pod on the rear fuselage */}
-      <g>
-        <path d="M78 62 Q104 56 120 62 Q120 74 104 76 Q86 76 78 72 Z" fill="#3a4256" />
-        <ellipse cx="80" cy="67" rx="3.5" ry="6" fill="#20283a" />
-      </g>
-      {/* low swept wing + winglet */}
-      <path d="M196 94 L150 126 L166 126 L220 98 Z" fill={url} />
-      <path d="M150 126 L146 114 L156 121 Z" fill={url} />
-    </g>
-  )
-}
 
 /* ---------- Interior: top-down seat map ---------- */
 function SeatMap({ cabin, accent, tier }) {
