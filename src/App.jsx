@@ -9,7 +9,7 @@ import RouteMap from './components/RouteMap'
 import Destinations from './components/Destinations'
 import Cabins from './components/Cabins'
 import Fleet from './components/Fleet'
-import EmptyLegs from './components/EmptyLegs'
+import LiveBoard from './components/LiveBoard'
 import BookCta from './components/BookCta'
 import BookingWidget from './components/BookingWidget'
 import Faq from './components/Faq'
@@ -33,7 +33,7 @@ export default function App() {
           <Destinations />
           <Cabins />
           <Fleet />
-          <EmptyLegs />
+          <LiveBoard />
           <BookCta />
           <BookingWidget />
           <Faq />
