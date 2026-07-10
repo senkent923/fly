@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { ArrowUpRight } from 'lucide-react'
-import VideoBackground from './VideoBackground'
+import SkyScene from './SkyScene'
 import { SCENES } from '../data'
 import { useReveal } from '../hooks/useReveal'
 
@@ -18,7 +18,7 @@ export default function Hero() {
       className="relative min-h-[100svh] w-full overflow-hidden"
       aria-label="Главный экран"
     >
-      <VideoBackground activeIndex={activeIndex} />
+      <SkyScene activeIndex={activeIndex} />
 
       {/* Content */}
       <div className="relative z-[2] mx-auto flex min-h-[100svh] max-w-[1340px] flex-col items-end justify-end gap-[150px] px-[15px] pt-[190px] md-tablet:gap-[110px] mobile:items-start mobile:gap-[72px] mobile:px-[18px] mobile:pt-[140px]">

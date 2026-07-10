@@ -1,96 +1,289 @@
+import { useState } from 'react'
+import { ArrowUpRight, Eye, Plane } from 'lucide-react'
+import { FLEET } from '../data/fleet'
 import { useReveal } from '../hooks/useReveal'
+import { useApp } from '../store/AppContext'
 
-const SPECS = [
-  { k: 'Дальность', v: '11 200', unit: 'км' },
-  { k: 'Крейсерская скорость', v: '0.85', unit: 'Маха' },
-  { k: 'Кают на борту', v: '12', unit: '' },
-  { k: 'Высота полёта', v: '13 100', unit: 'м' },
-]
+const today = new Date().toISOString().slice(0, 10)
 
 export default function Fleet() {
-  const [ref, visible] = useReveal(0.3)
+  const [ref, visible] = useReveal(0.2)
+  const { startBooking } = useApp()
+  const [idx, setIdx] = useState(1)
+  const [view, setView] = useState('exterior') // 'exterior' | 'cabin'
+  const ac = FLEET[idx]
+
+  const pick = (i) => {
+    setIdx(i)
+    setView('exterior')
+  }
 
   return (
     <section
+      id="fleet"
       className="relative overflow-hidden border-b border-white/10 bg-white/[0.02]"
       aria-label="Флот"
     >
-      <div className="mx-auto grid max-w-[1340px] grid-cols-2 gap-16 px-[15px] py-[140px] md-tablet:gap-10 mobile:grid-cols-1 mobile:gap-10 mobile:px-[18px] mobile:py-[90px]">
-        {/* Left: copy */}
-        <div ref={ref} className="flex flex-col justify-center">
-          <span
-            className={`reveal-up ${
-              visible ? 'is-visible' : ''
-            } mb-4 block text-xs font-medium uppercase tracking-[0.24em] text-[var(--accent)]`}
-          >
-            Флот
-          </span>
-          <h2
-            className={`reveal-up ${
-              visible ? 'is-visible' : ''
-            } mb-6 text-[52px] font-medium leading-[0.98] tracking-[-2px] md-tablet:text-[40px] mobile:text-[32px]`}
-          >
-            AETHER One —<br />
-            <span className="text-white/45">тихий сверхдальний джет.</span>
-          </h2>
-          <p
-            className={`reveal-up ${
-              visible ? 'is-visible' : ''
-            } max-w-[480px] text-base font-medium leading-6 tracking-[-0.16px] text-white/60`}
-          >
-            Полностью электрифицированная кабина, композитный корпус и двигатели
-            на устойчивом авиатопливе. Один борт — двенадцать кают, ноль
-            пересадок между континентами.
-          </p>
+      <div className="mx-auto max-w-[1340px] px-[15px] py-[140px] mobile:px-[18px] mobile:py-[90px]">
+        {/* heading + tier tabs */}
+        <div ref={ref} className="mb-12 flex items-end justify-between gap-6 mobile:flex-col mobile:items-start">
+          <div>
+            <span
+              className={`reveal-up ${visible ? 'is-visible' : ''} mb-4 block text-xs font-medium uppercase tracking-[0.24em] text-[var(--accent)]`}
+            >
+              Флот
+            </span>
+            <h2
+              className={`reveal-up ${visible ? 'is-visible' : ''} text-[52px] font-medium leading-[0.98] tracking-[-2px] md-tablet:text-[40px] mobile:text-[32px]`}
+            >
+              Три борта — <span className="text-white/45">три способа летать.</span>
+            </h2>
+          </div>
+
+          <div className="flex rounded-full border border-white/10 p-1">
+            {FLEET.map((f, i) => (
+              <button
+                key={f.id}
+                type="button"
+                onClick={() => pick(i)}
+                className={`rounded-full px-5 py-2.5 text-sm font-medium transition-colors ${
+                  i === idx ? 'bg-white text-black' : 'text-white/60 hover:text-white'
+                }`}
+              >
+                {f.tier}
+              </button>
+            ))}
+          </div>
         </div>
 
-        {/* Right: animated aircraft silhouette + specs */}
-        <div className="flex flex-col justify-center gap-10">
-          <Plane visible={visible} />
-          <dl className="grid grid-cols-2 gap-x-8 gap-y-7">
-            {SPECS.map((s, i) => (
-              <div
-                key={s.k}
-                className={`reveal-up ${visible ? 'is-visible' : ''} border-t border-white/10 pt-4`}
-                style={{ animationDelay: `${0.2 + i * 0.08}s` }}
-              >
-                <dt className="mb-1 text-[10px] font-medium uppercase tracking-[0.18em] text-white/40">
-                  {s.k}
-                </dt>
-                <dd className="text-[28px] font-medium tracking-[-0.5px]">
-                  {s.v}
-                  <span className="ml-1 text-sm text-white/45">{s.unit}</span>
-                </dd>
+        <div className="grid grid-cols-[1fr_1.1fr] gap-14 md-tablet:gap-8 mobile:grid-cols-1 mobile:gap-10">
+          {/* Left: model info */}
+          <div className="flex flex-col">
+            <div className="mb-1 flex items-baseline gap-3">
+              <h3 className="text-4xl font-medium tracking-[-1px]">{ac.model}</h3>
+              <span className="text-xs font-medium uppercase tracking-[0.14em] text-[var(--accent)]">
+                {ac.tier}
+              </span>
+            </div>
+            <span className="mb-5 text-xs font-medium uppercase tracking-[0.14em] text-white/35">
+              {ac.ref}
+            </span>
+            <p className="mb-8 max-w-[440px] text-base font-medium leading-6 tracking-[-0.16px] text-white/60">
+              {ac.tagline}
+            </p>
+
+            <dl className="mb-8 grid grid-cols-2 gap-x-8 gap-y-6">
+              {ac.specs.map((s) => (
+                <div key={s.k} className="border-t border-white/10 pt-3">
+                  <dt className="mb-1 text-[10px] font-medium uppercase tracking-[0.16em] text-white/40">
+                    {s.k}
+                  </dt>
+                  <dd className="text-2xl font-medium tracking-[-0.5px]">
+                    {s.v}
+                    <span className="ml-1 text-sm text-white/45">{s.unit}</span>
+                  </dd>
+                </div>
+              ))}
+            </dl>
+
+            {/* seat model (side profile) */}
+            <div className="mb-8 flex items-center gap-5 rounded-2xl border border-white/10 bg-black/30 p-5">
+              <SeatProfile type={ac.seatProfile} accent={ac.accent} />
+              <div>
+                <div className="mb-1 text-xs font-medium uppercase tracking-[0.14em] text-white/40">
+                  Модель кресла
+                </div>
+                <p className="max-w-[280px] text-sm text-white/70">{ac.seatNote}</p>
               </div>
-            ))}
-          </dl>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => startBooking({ fromCode: 'SVO', toCode: 'DXB', date: today, pax: 1 })}
+              className="fill-btn group inline-flex w-fit items-center gap-2 rounded-full border border-white px-6 py-3.5 text-sm font-medium tracking-[0.02em]"
+            >
+              Забронировать {ac.tier.toLowerCase()}
+              <ArrowUpRight size={16} className="transition-transform duration-500 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+            </button>
+          </div>
+
+          {/* Right: interactive aircraft */}
+          <div className="glow-card relative flex flex-col rounded-3xl border border-white/10 bg-gradient-to-br from-white/[0.04] to-transparent p-6 mobile:p-5">
+            {/* view toggle */}
+            <div className="mb-4 flex items-center justify-between">
+              <div className="flex rounded-full border border-white/10 p-1 text-xs">
+                {[
+                  ['exterior', 'Снаружи', Plane],
+                  ['cabin', 'Салон', Eye],
+                ].map(([id, label, Icon]) => (
+                  <button
+                    key={id}
+                    type="button"
+                    onClick={() => setView(id)}
+                    className={`flex items-center gap-1.5 rounded-full px-4 py-2 font-medium transition-colors ${
+                      view === id ? 'bg-white text-black' : 'text-white/55 hover:text-white'
+                    }`}
+                  >
+                    <Icon size={13} /> {label}
+                  </button>
+                ))}
+              </div>
+              <span className="text-[11px] uppercase tracking-[0.14em] text-white/35">
+                {view === 'exterior' ? 'нажмите на борт →' : 'схема салона'}
+              </span>
+            </div>
+
+            <div className="flex flex-1 items-center justify-center py-4">
+              {view === 'exterior' ? (
+                <button
+                  type="button"
+                  onClick={() => setView('cabin')}
+                  aria-label="Показать салон"
+                  className="group w-full"
+                  title="Показать салон"
+                >
+                  <TopViewPlane accent={ac.accent} scale={ac.exteriorScale} />
+                </button>
+              ) : (
+                <SeatMap cabin={ac.cabin} accent={ac.accent} tier={ac.tier} />
+              )}
+            </div>
+          </div>
         </div>
       </div>
     </section>
   )
 }
 
-function Plane({ visible }) {
+/* ---------- Exterior: top-down airliner ---------- */
+function TopViewPlane({ accent, scale = 1 }) {
   return (
-    <svg viewBox="0 0 600 200" className="w-full" aria-hidden="true">
+    <svg viewBox="0 0 320 200" className="mx-auto w-full max-w-[520px] overflow-visible transition-transform duration-500 group-hover:scale-[1.03]" style={{ transform: `scale(${scale})` }}>
+      <defs>
+        <linearGradient id="body" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="#f4f6fb" />
+          <stop offset="50%" stopColor="#c9d2e2" />
+          <stop offset="100%" stopColor="#8b96ab" />
+        </linearGradient>
+      </defs>
+      {/* main wings (swept back) */}
+      <path d="M168 92 L64 34 L96 30 L184 84 Z" fill="url(#body)" opacity="0.92" />
+      <path d="M168 108 L64 166 L96 170 L184 116 Z" fill="url(#body)" opacity="0.92" />
+      {/* engines */}
+      <rect x="120" y="60" width="34" height="12" rx="6" fill="#5c6579" />
+      <rect x="120" y="128" width="34" height="12" rx="6" fill="#5c6579" />
+      {/* tailplanes */}
+      <path d="M60 94 L26 74 L40 72 L74 88 Z" fill="url(#body)" opacity="0.9" />
+      <path d="M60 106 L26 126 L40 128 L74 112 Z" fill="url(#body)" opacity="0.9" />
+      {/* fuselage */}
+      <path d="M40 100 Q46 82 70 82 L250 88 Q292 92 306 100 Q292 108 250 112 L70 118 Q46 118 40 100 Z" fill="url(#body)" />
+      {/* nose */}
+      <path d="M292 96 Q306 100 292 104 Q300 100 292 96 Z" fill="#eef1f7" />
+      {/* centre spine + accent stripe */}
+      <path d="M52 100 L296 100" stroke="#9aa4b8" strokeWidth="1" opacity="0.6" />
+      <path d="M60 106 L292 103" stroke={accent} strokeWidth="2.5" opacity="0.85" />
+      {/* cockpit */}
+      <path d="M270 96 Q284 97 288 100 L284 103 Q276 102 270 101 Z" fill="#2a3346" />
+      {/* wing accent tips */}
+      <circle cx="64" cy="34" r="3" fill={accent} />
+      <circle cx="64" cy="166" r="3" fill={accent} />
+    </svg>
+  )
+}
+
+/* ---------- Interior: top-down seat map ---------- */
+function SeatMap({ cabin, accent, tier }) {
+  const { rows, layout, seatW, seatH, gap } = cabin
+  const cols = layout.length
+  const padX = 34
+  const padTop = 54
+  const padBottom = 30
+  const w = padX * 2 + cols * (seatW + gap) - gap
+  const h = padTop + padBottom + rows * (seatH + gap) - gap
+  const cx = w / 2
+
+  let seatNo = 0
+  return (
+    <svg viewBox={`0 0 ${w} ${h}`} className="mx-auto h-full max-h-[360px] w-auto">
+      {/* fuselage shell with nose */}
       <path
-        d="M40 118 C120 108 230 100 350 96 L470 92 C520 90 560 96 575 104 C560 110 520 114 470 112 L360 110 C300 128 250 150 210 168 L188 168 C196 146 205 128 214 112 L150 112 C120 124 92 138 66 150 L48 150 C56 136 64 126 40 118 Z"
-        fill="none"
-        stroke="var(--accent)"
+        d={`M12 ${padTop - 8}
+            Q${cx} 4 ${w - 12} ${padTop - 8}
+            L${w - 12} ${h - 14}
+            Q${cx} ${h - 2} 12 ${h - 14} Z`}
+        fill="rgba(255,255,255,0.03)"
+        stroke="rgba(255,255,255,0.14)"
         strokeWidth="1.5"
-        strokeLinejoin="round"
-        style={{
-          strokeDasharray: 2600,
-          strokeDashoffset: visible ? 0 : 2600,
-          transition: 'stroke-dashoffset 2.2s var(--ease-spring) 0.2s',
-        }}
       />
-      <path
-        d="M40 118 C120 108 230 100 350 96 L470 92 C520 90 560 96 575 104 C560 110 520 114 470 112 L360 110 C300 128 250 150 210 168 L188 168 C196 146 205 128 214 112 L150 112 C120 124 92 138 66 150 L48 150 C56 136 64 126 40 118 Z"
-        fill="var(--accent)"
-        opacity={visible ? 0.06 : 0}
-        style={{ transition: 'opacity 1s ease 1.4s' }}
-      />
+      {/* nose window / cockpit */}
+      <ellipse cx={cx} cy={padTop - 26} rx="16" ry="9" fill="rgba(255,255,255,0.05)" stroke="rgba(255,255,255,0.14)" />
+      <text x={cx} y={h - 20} textAnchor="middle" fill="rgba(255,255,255,0.35)" fontSize="10" className="font-sans uppercase" letterSpacing="2">
+        {tier}
+      </text>
+
+      {Array.from({ length: rows }).map((_, r) => {
+        let x = padX
+        return layout.map((cell, c) => {
+          const y = padTop + r * (seatH + gap)
+          if (cell === 'a') {
+            x += seatW + gap
+            return null
+          }
+          const sx = x
+          x += seatW + gap
+          seatNo += 1
+          const delay = (r * cols + c) * 0.02
+          return (
+            <g key={`${r}-${c}`} style={{ opacity: 0, animation: `videoFadeIn 0.4s ease ${delay}s forwards` }}>
+              {/* seat base */}
+              <rect x={sx} y={y} width={seatW} height={seatH} rx={Math.min(6, seatW / 4)}
+                fill={accent} fillOpacity="0.16" stroke={accent} strokeOpacity="0.7" strokeWidth="1.2" />
+              {/* headrest */}
+              <rect x={sx + seatW * 0.2} y={y + 2} width={seatW * 0.6} height={Math.max(4, seatH * 0.22)} rx="2"
+                fill={accent} fillOpacity="0.5" />
+            </g>
+          )
+        })
+      })}
+    </svg>
+  )
+}
+
+/* ---------- Seat side profile per class ---------- */
+function SeatProfile({ type, accent }) {
+  return (
+    <svg viewBox="0 0 130 96" className="h-[92px] w-[120px] shrink-0">
+      <g stroke={accent} strokeWidth="2" fill="none" strokeLinejoin="round" strokeLinecap="round">
+        {type === 'economy' && (
+          <>
+            {/* upright seat */}
+            <path d="M40 20 L40 56 L86 56 L86 66 L96 66" fill={accent} fillOpacity="0.08" />
+            <path d="M40 20 Q38 20 38 24 L38 54 Q40 58 46 58 L84 58" />
+            <path d="M40 58 L40 76 M84 58 L84 76" />
+            <path d="M42 24 L42 52" strokeOpacity="0.4" />
+          </>
+        )}
+        {type === 'business' && (
+          <>
+            {/* reclined lie-flat pod */}
+            <path d="M24 44 L96 40 L104 44 L104 54 L26 58 Z" fill={accent} fillOpacity="0.1" />
+            <path d="M24 44 L96 40" />
+            <path d="M20 34 Q24 32 30 34 L34 46" />
+            <path d="M24 58 L24 72 M104 54 L104 72" />
+            <path d="M100 30 L110 30" strokeOpacity="0.5" />
+          </>
+        )}
+        {type === 'lux' && (
+          <>
+            {/* private suite with bed */}
+            <rect x="20" y="30" width="90" height="44" rx="6" fill={accent} fillOpacity="0.08" />
+            <path d="M26 58 L104 58" />
+            <path d="M30 58 L30 48 Q30 44 36 44 L52 44" />
+            <circle cx="40" cy="50" r="5" strokeOpacity="0.7" />
+            <path d="M20 30 L20 74 M110 30 L110 74" strokeOpacity="0.5" />
+          </>
+        )}
+      </g>
     </svg>
   )
 }

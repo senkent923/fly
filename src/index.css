@@ -283,6 +283,71 @@ body {
   }
 }
 
+/* ---------- 2D sky scene ---------- */
+@keyframes flyAcross {
+  0% {
+    transform: translateX(-22%);
+  }
+  100% {
+    transform: translateX(122%);
+  }
+}
+
+@keyframes bob {
+  0%,
+  100% {
+    transform: translateY(0) rotate(-1deg);
+  }
+  50% {
+    transform: translateY(-14px) rotate(1deg);
+  }
+}
+
+@keyframes cloudPan {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-120%);
+  }
+}
+
+@keyframes blink {
+  0%,
+  45%,
+  55%,
+  100% {
+    opacity: 0.25;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+@keyframes auroraSway {
+  0%,
+  100% {
+    transform: translateX(-4%) skewX(-8deg) scaleY(1);
+    opacity: 0.55;
+  }
+  50% {
+    transform: translateX(6%) skewX(6deg) scaleY(1.15);
+    opacity: 0.85;
+  }
+}
+
+@keyframes sunPulse {
+  0%,
+  100% {
+    opacity: 0.75;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.06);
+  }
+}
+
 /* ---------- Extra utilities ---------- */
 .float-slow {
   animation: floatY 6s ease-in-out infinite;
