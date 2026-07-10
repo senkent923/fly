@@ -1,10 +1,12 @@
 import { useEffect, useState } from 'react'
 import { SCENES } from '../data'
+import AnimatedBackdrop from './AnimatedBackdrop'
 
 /**
  * Stacks all scene videos absolutely and crossfades to the active one.
  * On mount every clip is fetched as a blob and swapped to an object URL so
- * switching is instant with no network stall.
+ * switching is instant with no network stall. A pure-CSS animated backdrop
+ * sits underneath so there is always motion even if the videos never load.
  */
 export default function VideoBackground({ activeIndex }) {
   const [sources, setSources] = useState(() => SCENES.map((s) => s.video))
@@ -38,6 +40,9 @@ export default function VideoBackground({ activeIndex }) {
 
   return (
     <div className="absolute inset-0 overflow-hidden bg-black" aria-hidden="true">
+      {/* always-on animated base */}
+      <AnimatedBackdrop activeIndex={activeIndex} />
+
       {sources.map((src, i) => (
         <video
           key={SCENES[i].id}
