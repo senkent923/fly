@@ -62,8 +62,8 @@ function Aurora() {
       </div>
       <MoonGlow x="74%" y="16%" size={130} color="rgba(220,235,255,0.9)" />
       <Clouds tint="rgba(180,200,230,0.10)" />
-      <Overhead rot="46deg" scale={1.35} dur="30s" trail="rgba(210,235,255,0.6)" lit />
-      <Overhead rot="38deg" scale={0.6} dur="46s" delay="-14s" left="62%" trail="rgba(200,225,255,0.35)" />
+      {/* bottom-left → top-right */}
+      <Overhead path="flyDiag" rot="46deg" scale={0.6} dur="26s" trail="rgba(210,235,255,0.6)" lit />
     </div>
   )
 }
@@ -75,8 +75,8 @@ function Meridian() {
       <Stars count={130} />
       <MoonGlow x="20%" y="14%" size={110} color="rgba(200,214,255,0.85)" />
       <Clouds tint="rgba(120,150,220,0.07)" />
-      <Overhead rot="44deg" scale={1.3} dur="34s" trail="rgba(150,185,255,0.55)" lit accent="#7a5af8" />
-      <Overhead rot="50deg" scale={0.55} dur="52s" delay="-20s" left="30%" trail="rgba(150,185,255,0.3)" />
+      {/* left → right (horizontal), upper sky */}
+      <Overhead path="flyLTR" rot="90deg" scale={0.58} dur="24s" top="20vh" trail="rgba(150,185,255,0.55)" lit accent="#7a5af8" />
     </div>
   )
 }
@@ -88,22 +88,23 @@ function Sunset() {
       <Stars count={26} opacity={0.5} area={40} />
       <MoonGlow x="50%" y="18%" size={150} color="rgba(255,225,180,0.55)" />
       <Clouds tint="rgba(255,190,170,0.28)" big />
-      <Overhead rot="42deg" scale={1.35} dur="32s" trail="rgba(255,235,215,0.6)" silhouette />
-      <Overhead rot="36deg" scale={0.6} dur="50s" delay="-16s" left="24%" trail="rgba(255,225,200,0.32)" silhouette />
+      {/* top-left → bottom-right (descending toward the horizon) */}
+      <Overhead path="flyTLBR" rot="135deg" scale={0.6} dur="28s" trail="rgba(255,235,215,0.6)" silhouette />
     </div>
   )
 }
 
 /* ---------------- Plane seen from below, crossing overhead ---------------- */
-function Overhead({ rot, scale = 1, dur, delay = '0s', left = '0%', trail, lit, accent = '#F598F2', silhouette }) {
+function Overhead({ path = 'flyDiag', rot, scale = 1, dur, delay = '0s', left = '0%', top = '0', trail, lit, accent = '#F598F2', silhouette }) {
   return (
     <div
-      className="absolute top-0 left-0 will-change-transform"
+      className="absolute left-0 will-change-transform"
       style={{
+        top,
         left,
         '--fly-rot': rot,
         '--fly-scale': scale,
-        animation: `flyDiag ${dur} linear ${delay} infinite`,
+        animation: `${path} ${dur} linear ${delay} infinite`,
       }}
     >
       <div style={{ animation: 'swayX 6s ease-in-out infinite' }}>

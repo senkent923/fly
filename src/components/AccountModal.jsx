@@ -57,11 +57,12 @@ export default function AccountModal() {
             >
               <div>
                 <div className="flex items-center gap-2 text-lg font-medium tracking-[-0.4px]">
-                  {b.fromCode} <span className="text-white/30">→</span> {b.toCode}
+                  {b.fromCode} <span className="text-white/30">{b.round ? '⇄' : '→'}</span> {b.toCode}
                 </div>
                 <div className="mt-0.5 text-xs text-white/45">
                   {b.fromCity} — {b.toCity} · {b.classLabel} · {b.pax} пасс.
                   {b.date ? ` · ${b.date}` : ''}
+                  {b.returnDate ? ` ⇄ ${b.returnDate}` : ''}
                 </div>
                 <div className="mt-1 text-[11px] uppercase tracking-[0.1em] text-white/35">
                   Бронь {b.id}

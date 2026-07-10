@@ -13,14 +13,21 @@ import {
 } from '../data/airports'
 
 const today = new Date().toISOString().slice(0, 10)
+const plusDays = (iso, d) => {
+  const t = new Date(iso)
+  t.setDate(t.getDate() + d)
+  return t.toISOString().slice(0, 10)
+}
 
 export default function BookingWidget() {
   const { startBooking } = useApp()
   const [ref, visible] = useReveal(0.25)
 
+  const [round, setRound] = useState(false)
   const [fromCode, setFromCode] = useState('SVO')
   const [toCode, setToCode] = useState('DXB')
   const [date, setDate] = useState(today)
+  const [returnDate, setReturnDate] = useState(plusDays(today, 7))
   const [pax, setPax] = useState(1)
 
   const from = findAirport(fromCode)
@@ -37,7 +44,14 @@ export default function BookingWidget() {
 
   const search = () => {
     if (same) return
-    startBooking({ fromCode, toCode, date, pax })
+    startBooking({
+      fromCode,
+      toCode,
+      date,
+      returnDate: round ? returnDate : null,
+      pax,
+      round,
+    })
   }
 
   return (
@@ -66,6 +80,25 @@ export default function BookingWidget() {
           visible ? 'is-visible' : ''
         } glow-card rounded-3xl border border-white/12 bg-white/[0.03] p-6 backdrop-blur-sm md-tablet:p-6 mobile:p-5`}
       >
+        {/* trip type */}
+        <div className="mb-4 flex w-fit rounded-full border border-white/10 p-1 text-sm">
+          {[
+            ['oneway', 'В одну сторону'],
+            ['round', 'Туда-обратно'],
+          ].map(([id, label]) => (
+            <button
+              key={id}
+              type="button"
+              onClick={() => setRound(id === 'round')}
+              className={`rounded-full px-5 py-2 font-medium transition-colors ${
+                (id === 'round') === round ? 'bg-white text-black' : 'text-white/60 hover:text-white'
+              }`}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+
         {/* fields */}
         <div className="flex items-stretch gap-3 mobile:flex-col">
           <AirportField label="Откуда" value={fromCode} onChange={setFromCode} />
@@ -81,15 +114,30 @@ export default function BookingWidget() {
 
           <AirportField label="Куда" value={toCode} onChange={setToCode} />
 
-          <Field label="Дата">
+          <Field label="Вылет">
             <input
               type="date"
               value={date}
               min={today}
-              onChange={(e) => setDate(e.target.value)}
+              onChange={(e) => {
+                setDate(e.target.value)
+                if (e.target.value > returnDate) setReturnDate(plusDays(e.target.value, 7))
+              }}
               className="w-full bg-transparent text-base font-medium text-white outline-none [color-scheme:dark]"
             />
           </Field>
+
+          {round && (
+            <Field label="Обратно">
+              <input
+                type="date"
+                value={returnDate}
+                min={date}
+                onChange={(e) => setReturnDate(e.target.value)}
+                className="w-full bg-transparent text-base font-medium text-white outline-none [color-scheme:dark]"
+              />
+            </Field>
+          )}
 
           <Field label="Пассажиры">
             <div className="flex items-center justify-between gap-2">
@@ -127,9 +175,10 @@ export default function BookingWidget() {
                   <div key={c.id} className="flex flex-col">
                     <span className="text-[11px] uppercase tracking-[0.14em] text-white/40">
                       {c.label}
+                      {round && <span className="ml-1 text-[var(--accent)]">×2</span>}
                     </span>
                     <span className="text-lg font-medium">
-                      {formatRub(priceFor(km, c.id, pax))}
+                      {formatRub(priceFor(km, c.id, pax, round))}
                     </span>
                   </div>
                 ))}

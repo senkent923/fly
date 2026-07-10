@@ -58,9 +58,13 @@ export function basePrice(km) {
   return Math.round((km * 6.2 + 2500) / 100) * 100
 }
 
-export function priceFor(km, classId, pax = 1) {
+// Round trips price both legs at a ~5% return discount, like real fares.
+export const ROUND_TRIP_FACTOR = 1.9
+
+export function priceFor(km, classId, pax = 1, round = false) {
   const cls = CLASSES.find((c) => c.id === classId) || CLASSES[0]
-  return Math.round((basePrice(km) * cls.mult * pax) / 100) * 100
+  const legs = round ? ROUND_TRIP_FACTOR : 1
+  return Math.round((basePrice(km) * cls.mult * pax * legs) / 100) * 100
 }
 
 export function formatRub(n) {

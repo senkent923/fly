@@ -23,6 +23,8 @@ export default function BookingModal() {
   const to = findAirport(bookingDraft?.toCode)
   const pax = bookingDraft?.pax || 1
   const date = bookingDraft?.date
+  const round = !!bookingDraft?.round
+  const returnDate = bookingDraft?.returnDate
 
   const km = useMemo(() => Math.round(distanceKm(from, to)), [from, to])
   const dur = useMemo(() => flightDuration(km), [km])
@@ -43,7 +45,7 @@ export default function BookingModal() {
 
   const onPaid = (email) => {
     const cls = CLASSES.find((c) => c.id === classId)
-    const total = priceFor(km, classId, pax)
+    const total = priceFor(km, classId, pax, round)
     const booking = {
       id: 'AE' + Math.random().toString(36).slice(2, 8).toUpperCase(),
       fromCode: from.code,
@@ -51,6 +53,8 @@ export default function BookingModal() {
       toCode: to.code,
       toCity: to.city,
       date,
+      returnDate: round ? returnDate : null,
+      round,
       pax,
       classLabel: cls.label,
       price: total,
@@ -70,7 +74,7 @@ export default function BookingModal() {
     <Modal open={open} onClose={reset} title={title} maxWidth="max-w-[640px]">
       {/* route summary */}
       {step !== 'success' && (
-        <RouteSummary from={from} to={to} dur={dur} km={km} date={date} pax={pax} />
+        <RouteSummary from={from} to={to} dur={dur} km={km} date={date} returnDate={round ? returnDate : null} pax={pax} />
       )}
 
       {step === 'fares' && (
@@ -92,10 +96,10 @@ export default function BookingModal() {
               </div>
               <div className="text-right">
                 <div className="text-xl font-medium tracking-[-0.5px] group-hover:text-[var(--accent)]">
-                  {formatRub(priceFor(km, c.id, pax))}
+                  {formatRub(priceFor(km, c.id, pax, round))}
                 </div>
                 <div className="text-[11px] uppercase tracking-[0.12em] text-white/40">
-                  за {pax} {plural(pax)}
+                  {round ? 'туда-обратно · ' : ''}за {pax} {plural(pax)}
                 </div>
               </div>
             </button>
@@ -105,7 +109,7 @@ export default function BookingModal() {
 
       {step === 'checkout' && (
         <Checkout
-          priceLabel={formatRub(priceFor(km, classId, pax))}
+          priceLabel={formatRub(priceFor(km, classId, pax, round))}
           classLabel={CLASSES.find((c) => c.id === classId).label}
           isAuthed={isAuthed}
           user={user}
@@ -121,7 +125,7 @@ export default function BookingModal() {
   )
 }
 
-function RouteSummary({ from, to, dur, km, date, pax }) {
+function RouteSummary({ from, to, dur, km, date, returnDate, pax }) {
   return (
     <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-5">
       <div className="flex items-center gap-4">
@@ -138,7 +142,12 @@ function RouteSummary({ from, to, dur, km, date, pax }) {
       <div className="mt-4 flex flex-wrap gap-x-6 gap-y-1 text-xs text-white/50">
         <span>В пути ~{dur.label}</span>
         <span>{km.toLocaleString('ru-RU')} км</span>
-        {date && <span>Дата: {date}</span>}
+        {date && <span>Вылет: {date}</span>}
+        {returnDate ? (
+          <span className="text-[var(--accent)]">Обратно: {returnDate}</span>
+        ) : (
+          <span>В одну сторону</span>
+        )}
         <span>{pax} {plural(pax)}</span>
       </div>
     </div>
@@ -268,10 +277,12 @@ function Success({ order, onClose }) {
       </div>
       <div className="w-full rounded-2xl border border-white/10 bg-white/[0.02] p-5 text-left text-sm">
         <Row k="Номер брони" v={order.id} />
-        <Row k="Маршрут" v={`${order.fromCode} → ${order.toCode}`} />
+        <Row k="Маршрут" v={`${order.fromCode} ${order.round ? '⇄' : '→'} ${order.toCode}`} />
+        <Row k="Тип" v={order.round ? 'Туда-обратно' : 'В одну сторону'} />
         <Row k="Класс" v={order.classLabel} />
         <Row k="Пассажиров" v={order.pax} />
-        {order.date && <Row k="Дата" v={order.date} />}
+        {order.date && <Row k="Вылет" v={order.date} />}
+        {order.returnDate && <Row k="Обратно" v={order.returnDate} />}
         <Row k="Сумма" v={formatRub(order.price)} last />
       </div>
       <button onClick={onClose} className="fill-btn w-full rounded-full border border-white py-3 text-sm font-medium">

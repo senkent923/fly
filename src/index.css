@@ -348,7 +348,8 @@ body {
   }
 }
 
-/* plane passing overhead, seen from the ground — corner to corner */
+/* planes passing overhead, seen from the ground */
+/* bottom-left → top-right */
 @keyframes flyDiag {
   0% {
     transform: translate(-20vw, 118vh) rotate(var(--fly-rot, 42deg)) scale(var(--fly-scale, 1));
@@ -362,6 +363,40 @@ body {
   }
   100% {
     transform: translate(116vw, -28vh) rotate(var(--fly-rot, 42deg)) scale(var(--fly-scale, 1));
+    opacity: 0;
+  }
+}
+/* left → right (horizontal) */
+@keyframes flyLTR {
+  0% {
+    transform: translate(-22vw, 0) rotate(var(--fly-rot, 90deg)) scale(var(--fly-scale, 1));
+    opacity: 0;
+  }
+  8% {
+    opacity: 1;
+  }
+  92% {
+    opacity: 1;
+  }
+  100% {
+    transform: translate(120vw, 0) rotate(var(--fly-rot, 90deg)) scale(var(--fly-scale, 1));
+    opacity: 0;
+  }
+}
+/* top-left → bottom-right (descending) */
+@keyframes flyTLBR {
+  0% {
+    transform: translate(-20vw, -28vh) rotate(var(--fly-rot, 135deg)) scale(var(--fly-scale, 1));
+    opacity: 0;
+  }
+  8% {
+    opacity: 1;
+  }
+  92% {
+    opacity: 1;
+  }
+  100% {
+    transform: translate(118vw, 116vh) rotate(var(--fly-rot, 135deg)) scale(var(--fly-scale, 1));
     opacity: 0;
   }
 }
