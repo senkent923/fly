@@ -3,7 +3,7 @@ import { MARQUEE } from '../data'
 export default function Marquee() {
   const items = [...MARQUEE, ...MARQUEE]
   return (
-    <div className="relative w-full overflow-hidden border-y border-white/10 py-5">
+    <div className="marquee-mask relative w-full overflow-hidden border-y border-white/10 py-5">
       <div className="marquee-track flex w-max items-center gap-10 whitespace-nowrap">
         {items.map((label, i) => (
           <span key={i} className="flex items-center gap-10">

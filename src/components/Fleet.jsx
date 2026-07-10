@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { ArrowUpRight, Maximize2, X } from 'lucide-react'
 import { useReveal } from '../hooks/useReveal'
 import { useApp } from '../store/AppContext'
+import { Tilt } from './Interactive'
 
 const today = new Date().toISOString().slice(0, 10)
 
@@ -84,10 +85,11 @@ function AircraftCard({ ac, index, onZoom }) {
   const { startBooking } = useApp()
 
   return (
+    <Tilt max={5} className="h-full rounded-3xl">
     <article
       ref={ref}
       style={{ animationDelay: `${index * 0.1}s` }}
-      className={`reveal-up ${visible ? 'is-visible' : ''} glow-card group flex flex-col overflow-hidden rounded-3xl border border-white/10 bg-white/[0.015]`}
+      className={`reveal-up ${visible ? 'is-visible' : ''} glow-card group flex h-full flex-col overflow-hidden rounded-3xl border border-white/10 bg-white/[0.015]`}
     >
       {/* photo */}
       <figure className="relative m-0">
@@ -150,6 +152,7 @@ function AircraftCard({ ac, index, onZoom }) {
         </button>
       </div>
     </article>
+    </Tilt>
   )
 }
 

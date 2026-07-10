@@ -1,6 +1,7 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { ArrowUpRight } from 'lucide-react'
 import SkyScene from './SkyScene'
+import { Magnetic } from './Interactive'
 import { SCENES } from '../data'
 import { useReveal } from '../hooks/useReveal'
 
@@ -12,16 +13,48 @@ export default function Hero() {
   const [nameRef, nameVisible] = useReveal(0.35)
   const [copyRef, copyVisible] = useReveal(0.35)
 
+  const skyRef = useRef(null)
+  const contentRef = useRef(null)
+
+  // Scroll parallax: sky drifts slower, content lifts and fades.
+  useEffect(() => {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
+    let raf = 0
+    const update = () => {
+      const y = window.scrollY
+      if (y > window.innerHeight * 1.3) return
+      if (skyRef.current) skyRef.current.style.transform = `translate3d(0, ${y * 0.3}px, 0)`
+      if (contentRef.current) {
+        contentRef.current.style.transform = `translate3d(0, ${y * 0.14}px, 0)`
+        contentRef.current.style.opacity = String(Math.max(0, 1 - y / 650))
+      }
+    }
+    const onScroll = () => {
+      cancelAnimationFrame(raf)
+      raf = requestAnimationFrame(update)
+    }
+    window.addEventListener('scroll', onScroll, { passive: true })
+    update()
+    return () => {
+      window.removeEventListener('scroll', onScroll)
+      cancelAnimationFrame(raf)
+    }
+  }, [])
+
   return (
     <section
       id="top"
       className="relative min-h-[100svh] w-full overflow-hidden"
       aria-label="Главный экран"
     >
-      <SkyScene activeIndex={activeIndex} />
+      <div ref={skyRef} className="pointer-events-none absolute inset-x-0 -top-[12%] h-[124%] will-change-transform">
+        <SkyScene activeIndex={activeIndex} />
+      </div>
 
       {/* Content */}
-      <div className="relative z-[2] mx-auto flex min-h-[100svh] max-w-[1340px] flex-col items-end justify-end gap-[150px] px-[15px] pt-[190px] md-tablet:gap-[110px] mobile:items-start mobile:gap-[72px] mobile:px-[18px] mobile:pt-[140px]">
+      <div
+        ref={contentRef}
+        className="relative z-[2] mx-auto flex min-h-[100svh] max-w-[1340px] flex-col items-end justify-end gap-[150px] px-[15px] pt-[190px] will-change-transform md-tablet:gap-[110px] mobile:items-start mobile:gap-[72px] mobile:px-[18px] mobile:pt-[140px]">
         {/* Upper: scene switcher + status */}
         <div className="flex w-full items-end justify-between mobile:flex-col mobile:items-start mobile:gap-7">
           {/* Scene switcher */}
@@ -101,19 +134,22 @@ export default function Hero() {
               без терминалов, без компромиссов — только небо, по вашему
               расписанию и на углеродно-нейтральном флоте.
             </p>
-            <a
-              href="#book"
-              style={{ animationDelay: '0.08s' }}
-              className={`reveal-right ${
-                copyVisible ? 'is-visible' : ''
-              } fill-btn group inline-flex w-fit items-center gap-2 rounded-full border border-white px-6 py-3 text-sm font-medium tracking-[0.02em]`}
+            <Magnetic
+              strength={0.5}
+              className={`reveal-right w-fit ${copyVisible ? 'is-visible' : ''}`}
             >
-              забронировать место
-              <ArrowUpRight
-                size={16}
-                className="transition-transform duration-500 group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
-              />
-            </a>
+              <a
+                href="#book"
+                style={{ animationDelay: '0.08s' }}
+                className="fill-btn group inline-flex w-fit items-center gap-2 rounded-full border border-white px-6 py-3 text-sm font-medium tracking-[0.02em]"
+              >
+                забронировать место
+                <ArrowUpRight
+                  size={16}
+                  className="transition-transform duration-500 group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
+                />
+              </a>
+            </Magnetic>
           </div>
         </div>
       </div>

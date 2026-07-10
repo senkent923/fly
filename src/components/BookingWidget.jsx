@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react'
 import { ArrowLeftRight, Minus, Plus, Search } from 'lucide-react'
 import { useApp } from '../store/AppContext'
 import { useReveal } from '../hooks/useReveal'
+import { Magnetic } from './Interactive'
 import {
   AIRPORTS,
   CLASSES,
@@ -186,15 +187,17 @@ export default function BookingWidget() {
             </div>
           )}
 
-          <button
-            type="button"
-            onClick={search}
-            disabled={same}
-            className="fill-btn group flex shrink-0 items-center justify-center gap-2 rounded-full border border-white px-8 py-4 text-sm font-medium tracking-[0.02em] disabled:cursor-not-allowed disabled:opacity-40"
-          >
-            <Search size={16} />
-            Подобрать тариф
-          </button>
+          <Magnetic strength={0.45} className="shrink-0">
+            <button
+              type="button"
+              onClick={search}
+              disabled={same}
+              className="fill-btn group flex w-full items-center justify-center gap-2 rounded-full border border-white px-8 py-4 text-sm font-medium tracking-[0.02em] disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              <Search size={16} />
+              Подобрать тариф
+            </button>
+          </Magnetic>
         </div>
       </div>
     </section>

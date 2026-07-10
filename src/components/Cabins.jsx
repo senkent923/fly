@@ -1,5 +1,6 @@
 import { CABINS } from '../data'
 import { useReveal } from '../hooks/useReveal'
+import { Tilt } from './Interactive'
 
 export default function Cabins() {
   const [headRef, headVisible] = useReveal(0.35)
@@ -41,12 +42,13 @@ export default function Cabins() {
 function CabinCard({ c, index }) {
   const [ref, visible] = useReveal(0.3)
   return (
+    <Tilt className="rounded-2xl">
     <article
       ref={ref}
       style={{ animationDelay: `${index * 0.1}s` }}
       className={`reveal-up ${
         visible ? 'is-visible' : ''
-      } glow-card group flex flex-col justify-between rounded-2xl border border-white/10 bg-white/[0.015] p-8 transition-all duration-500 hover:-translate-y-1.5 hover:bg-white/[0.03]`}
+      } glow-card group flex h-full flex-col justify-between rounded-2xl border border-white/10 bg-white/[0.015] p-8 transition-colors duration-500 hover:bg-white/[0.03]`}
     >
       <div className="mb-16 flex items-start justify-between">
         <span className="text-xs font-medium uppercase tracking-[0.2em] text-white/40">
@@ -66,5 +68,6 @@ function CabinCard({ c, index }) {
         </span>
       </div>
     </article>
+    </Tilt>
   )
 }
