@@ -115,54 +115,60 @@ function Overhead({ path = 'flyDiag', rot, scale = 1, dur, delay = '0s', left = 
 }
 
 function Jet({ trail, lit, accent, silhouette }) {
-  const body = silhouette ? '#140f1e' : '#0e131f'
-  const rim = silhouette ? '#2a2036' : 'rgba(210,224,255,0.35)'
+  const body = silhouette ? '#161020' : '#0f1420'
+  const dark = silhouette ? '#0c0912' : '#1b2233'
+  const rim = silhouette ? 'rgba(90,70,110,0.6)' : 'rgba(200,218,255,0.4)'
   return (
-    <svg viewBox="0 0 160 340" width="160" className="overflow-visible">
+    <svg viewBox="0 0 160 350" width="150" className="overflow-visible">
       <defs>
         <linearGradient id="ctrail" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor={trail} stopOpacity="0.9" />
+          <stop offset="0%" stopColor={trail} stopOpacity="0.85" />
           <stop offset="100%" stopColor={trail} stopOpacity="0" />
         </linearGradient>
       </defs>
 
-      {/* twin contrails streaming from the engines, trailing behind (down) */}
-      <rect x="60" y="150" width="4" height="180" rx="2" fill="url(#ctrail)" />
-      <rect x="96" y="150" width="4" height="180" rx="2" fill="url(#ctrail)" />
+      {/* twin contrails streaming from the aft engines */}
+      <rect x="66" y="176" width="3.4" height="168" rx="1.7" fill="url(#ctrail)" />
+      <rect x="90.6" y="176" width="3.4" height="168" rx="1.7" fill="url(#ctrail)" />
 
-      {/* main wings, swept back (tips toward tail) */}
-      <path d="M74 96 L14 150 L20 158 L76 118 Z" fill={body} />
-      <path d="M86 96 L146 150 L140 158 L84 118 Z" fill={body} />
-      {/* winglets */}
-      <path d="M14 150 L10 140 L18 146 Z" fill={body} />
-      <path d="M146 150 L150 140 L142 146 Z" fill={body} />
+      {/* swept main wings with a slight kink, tips raked back */}
+      <path d="M72 104 L12 150 L20 159 L74 126 Z" fill={body} />
+      <path d="M88 104 L148 150 L140 159 L86 126 Z" fill={body} />
+      {/* raked winglets */}
+      <path d="M12 150 L6 141 L16 149 Z" fill={dark} />
+      <path d="M148 150 L154 141 L144 149 Z" fill={dark} />
 
-      {/* engine pods */}
-      <rect x="58" y="112" width="9" height="22" rx="4" fill={silhouette ? '#0c0912' : '#1a2030'} />
-      <rect x="93" y="112" width="9" height="22" rx="4" fill={silhouette ? '#0c0912' : '#1a2030'} />
+      {/* aft-mounted engine nacelles beside the rear fuselage */}
+      <rect x="58" y="150" width="10" height="30" rx="5" fill={dark} />
+      <rect x="92" y="150" width="10" height="30" rx="5" fill={dark} />
 
-      {/* fuselage */}
-      <path d="M80 20 Q90 24 91 60 L92 150 Q90 168 80 172 Q70 168 68 150 L69 60 Q70 24 80 20 Z" fill={body} />
-      {/* rim highlight down the spine */}
-      <path d="M80 24 L80 168" stroke={rim} strokeWidth="1.4" />
-      {/* horizontal stabilisers near tail */}
-      <path d="M74 150 L48 172 L52 177 L76 160 Z" fill={body} />
-      <path d="M86 150 L112 172 L108 177 L84 160 Z" fill={body} />
+      {/* fuselage: pointed nose → slender body → tail cone */}
+      <path
+        d="M80 16
+           Q89 26 89 58 L90 150 Q90 176 84 196 L80 206 L76 196 Q70 176 70 150 L71 58 Q71 26 80 16 Z"
+        fill={body}
+      />
+      {/* belly centre highlight */}
+      <path d="M80 26 L80 190" stroke={rim} strokeWidth="1.6" />
 
-      {/* cockpit hint */}
-      {!silhouette && <ellipse cx="80" cy="34" rx="5" ry="7" fill="rgba(180,210,255,0.4)" />}
+      {/* T-tail horizontal stabiliser at the tail, swept back */}
+      <path d="M78 184 L52 202 L59 207 L80 192 Z" fill={body} />
+      <path d="M82 184 L108 202 L101 207 L80 192 Z" fill={body} />
 
-      {/* aviation nav lights: red port, green starboard, white tail strobe */}
+      {/* cockpit glint */}
+      {!silhouette && <ellipse cx="80" cy="30" rx="4.5" ry="7" fill="rgba(150,195,255,0.45)" />}
+
+      {/* nav lights: red port, green starboard, tail + nose strobes */}
       {lit && (
         <>
-          <circle cx="16" cy="150" r="3.2" fill="#ff4d4d">
-            <animate attributeName="opacity" values="0.4;1;0.4" dur="1.8s" repeatCount="indefinite" />
+          <circle cx="13" cy="150" r="3" fill="#ff4d4d">
+            <animate attributeName="opacity" values="0.35;1;0.35" dur="1.8s" repeatCount="indefinite" />
           </circle>
-          <circle cx="144" cy="150" r="3.2" fill="#49e07a">
-            <animate attributeName="opacity" values="0.4;1;0.4" dur="1.8s" repeatCount="indefinite" />
+          <circle cx="147" cy="150" r="3" fill="#49e07a">
+            <animate attributeName="opacity" values="0.35;1;0.35" dur="1.8s" repeatCount="indefinite" />
           </circle>
-          <circle cx="80" cy="170" r="2.6" fill={accent} style={{ animation: 'blink 2.4s infinite' }} />
-          <circle cx="80" cy="30" r="2.4" fill="#fff" style={{ animation: 'blink 1.3s infinite' }} />
+          <circle cx="80" cy="204" r="2.4" fill={accent} style={{ animation: 'blink 2.4s infinite' }} />
+          <circle cx="80" cy="26" r="2.2" fill="#fff" style={{ animation: 'blink 1.3s infinite' }} />
         </>
       )}
     </svg>
