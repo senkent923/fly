@@ -432,6 +432,25 @@ body {
   }
 }
 
+@keyframes bankRoll {
+  0%,
+  100% {
+    transform: rotate(-2.5deg);
+  }
+  50% {
+    transform: rotate(2.5deg);
+  }
+}
+@keyframes enginePulse {
+  0%,
+  100% {
+    opacity: 0.4;
+  }
+  50% {
+    opacity: 0.85;
+  }
+}
+
 /* On phones the plane is small and easily missed — scale it up so the
    overhead flight animation is clearly visible. */
 @media (max-width: 809.98px) {
@@ -592,6 +611,60 @@ body {
 }
 .marquee-mask:hover .marquee-track {
   animation-play-state: paused;
+}
+
+/* ---------- Intro ---------- */
+@keyframes introLogoIn {
+  from {
+    opacity: 0;
+    filter: blur(14px);
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    filter: blur(0);
+    transform: translateY(0);
+  }
+}
+@keyframes introLineFill {
+  from {
+    width: 0;
+  }
+  to {
+    width: 100%;
+  }
+}
+@keyframes introOut {
+  to {
+    transform: translateY(-100%);
+  }
+}
+@keyframes introPlane {
+  0% {
+    transform: translate(-42vw, 8vh) rotate(16deg);
+    opacity: 0;
+  }
+  20%,
+  80% {
+    opacity: 1;
+  }
+  100% {
+    transform: translate(42vw, -8vh) rotate(16deg);
+    opacity: 0;
+  }
+}
+.intro-logo {
+  animation: introLogoIn 0.9s var(--ease-spring) both;
+}
+.intro-line span {
+  animation: introLineFill 1.3s var(--ease-spring) 0.2s both;
+}
+.intro-plane {
+  top: 38%;
+  animation: introPlane 2s ease-in-out both;
+}
+.intro-exit {
+  animation: introOut 0.8s var(--ease-spring) forwards;
 }
 
 /* ---------- Reduced motion ---------- */

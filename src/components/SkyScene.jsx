@@ -1,3 +1,5 @@
+import { useId } from 'react'
+
 /**
  * 2D sky seen from the ground looking straight up. Three moods crossfade
  * with the hero's route switcher: aurora night, night meridian and a sunset
@@ -115,57 +117,85 @@ function Overhead({ path = 'flyDiag', rot, scale = 1, dur, delay = '0s', left = 
 }
 
 function Jet({ trail, lit, accent, silhouette }) {
-  const body = silhouette ? '#161020' : '#0f1420'
-  const dark = silhouette ? '#0c0912' : '#1b2233'
-  const rim = silhouette ? 'rgba(90,70,110,0.6)' : 'rgba(200,218,255,0.4)'
+  // stable unique gradient ids so multiple jets don't clash
+  const uid = useId().replace(/[:]/g, '')
+  const topCol = silhouette ? '#241a30' : '#20293b'
+  const midCol = silhouette ? '#15101d' : '#111725'
+  const botCol = silhouette ? '#0b0812' : '#080b13'
+  const rim = silhouette ? 'rgba(120,95,150,0.7)' : 'rgba(200,220,255,0.5)'
+  const dark = silhouette ? '#0b0812' : '#161c2b'
   return (
-    <svg viewBox="0 0 160 350" width="150" className="overflow-visible">
+    <svg viewBox="0 0 160 350" width="150" className="overflow-visible" style={{ animation: 'bankRoll 9s ease-in-out infinite' }}>
       <defs>
-        <linearGradient id="ctrail" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor={trail} stopOpacity="0.85" />
+        <linearGradient id={`ctrail-${uid}`} x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor={trail} stopOpacity="0.9" />
           <stop offset="100%" stopColor={trail} stopOpacity="0" />
         </linearGradient>
+        <linearGradient id={`body-${uid}`} x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0%" stopColor={midCol} />
+          <stop offset="42%" stopColor={topCol} />
+          <stop offset="58%" stopColor={topCol} />
+          <stop offset="100%" stopColor={botCol} />
+        </linearGradient>
+        <linearGradient id={`wing-${uid}`} x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor={topCol} />
+          <stop offset="100%" stopColor={botCol} />
+        </linearGradient>
+        <radialGradient id={`eglow-${uid}`}>
+          <stop offset="0%" stopColor={accent} stopOpacity="0.9" />
+          <stop offset="100%" stopColor={accent} stopOpacity="0" />
+        </radialGradient>
       </defs>
 
-      {/* twin contrails streaming from the aft engines */}
-      <rect x="66" y="176" width="3.4" height="168" rx="1.7" fill="url(#ctrail)" />
-      <rect x="90.6" y="176" width="3.4" height="168" rx="1.7" fill="url(#ctrail)" />
+      {/* tapered twin contrails from the aft engines */}
+      <polygon points="64,178 70,178 68,346 66,346" fill={`url(#ctrail-${uid})`} />
+      <polygon points="90,178 96,178 94,346 92,346" fill={`url(#ctrail-${uid})`} />
 
-      {/* swept main wings with a slight kink, tips raked back */}
-      <path d="M72 104 L12 150 L20 159 L74 126 Z" fill={body} />
-      <path d="M88 104 L148 150 L140 159 L86 126 Z" fill={body} />
+      {/* soft engine glow */}
+      {lit && (
+        <>
+          <circle cx="63" cy="182" r="10" fill={`url(#eglow-${uid})`} style={{ animation: 'enginePulse 1.8s ease-in-out infinite' }} />
+          <circle cx="97" cy="182" r="10" fill={`url(#eglow-${uid})`} style={{ animation: 'enginePulse 1.8s ease-in-out infinite 0.3s' }} />
+        </>
+      )}
+
+      {/* swept main wings with raked tips */}
+      <path d="M72 104 L12 150 L20 159 L74 126 Z" fill={`url(#wing-${uid})`} />
+      <path d="M88 104 L148 150 L140 159 L86 126 Z" fill={`url(#wing-${uid})`} />
       {/* raked winglets */}
-      <path d="M12 150 L6 141 L16 149 Z" fill={dark} />
-      <path d="M148 150 L154 141 L144 149 Z" fill={dark} />
+      <path d="M12 150 L5 140 L17 149 Z" fill={dark} />
+      <path d="M148 150 L155 140 L143 149 Z" fill={dark} />
 
-      {/* aft-mounted engine nacelles beside the rear fuselage */}
-      <rect x="58" y="150" width="10" height="30" rx="5" fill={dark} />
-      <rect x="92" y="150" width="10" height="30" rx="5" fill={dark} />
+      {/* aft-mounted engine nacelles */}
+      <rect x="57" y="150" width="11" height="32" rx="5.5" fill={dark} />
+      <rect x="92" y="150" width="11" height="32" rx="5.5" fill={dark} />
+      <ellipse cx="62.5" cy="182" rx="4" ry="2.4" fill={silhouette ? '#060409' : '#05070d'} />
+      <ellipse cx="97.5" cy="182" rx="4" ry="2.4" fill={silhouette ? '#060409' : '#05070d'} />
 
-      {/* fuselage: pointed nose → slender body → tail cone */}
+      {/* fuselage with metallic gradient */}
       <path
         d="M80 16
            Q89 26 89 58 L90 150 Q90 176 84 196 L80 206 L76 196 Q70 176 70 150 L71 58 Q71 26 80 16 Z"
-        fill={body}
+        fill={`url(#body-${uid})`}
       />
-      {/* belly centre highlight */}
-      <path d="M80 26 L80 190" stroke={rim} strokeWidth="1.6" />
+      {/* spine highlight */}
+      <path d="M80 24 L80 190" stroke={rim} strokeWidth="1.4" strokeOpacity="0.8" />
 
-      {/* T-tail horizontal stabiliser at the tail, swept back */}
-      <path d="M78 184 L52 202 L59 207 L80 192 Z" fill={body} />
-      <path d="M82 184 L108 202 L101 207 L80 192 Z" fill={body} />
+      {/* T-tail horizontal stabiliser */}
+      <path d="M78 184 L52 202 L59 207 L80 192 Z" fill={`url(#wing-${uid})`} />
+      <path d="M82 184 L108 202 L101 207 L80 192 Z" fill={`url(#wing-${uid})`} />
 
       {/* cockpit glint */}
-      {!silhouette && <ellipse cx="80" cy="30" rx="4.5" ry="7" fill="rgba(150,195,255,0.45)" />}
+      {!silhouette && <ellipse cx="80" cy="30" rx="4.5" ry="7" fill="rgba(150,195,255,0.5)" />}
 
       {/* nav lights: red port, green starboard, tail + nose strobes */}
       {lit && (
         <>
-          <circle cx="13" cy="150" r="3" fill="#ff4d4d">
-            <animate attributeName="opacity" values="0.35;1;0.35" dur="1.8s" repeatCount="indefinite" />
+          <circle cx="12" cy="150" r="3.2" fill="#ff4d4d">
+            <animate attributeName="opacity" values="0.3;1;0.3" dur="1.8s" repeatCount="indefinite" />
           </circle>
-          <circle cx="147" cy="150" r="3" fill="#49e07a">
-            <animate attributeName="opacity" values="0.35;1;0.35" dur="1.8s" repeatCount="indefinite" />
+          <circle cx="148" cy="150" r="3.2" fill="#49e07a">
+            <animate attributeName="opacity" values="0.3;1;0.3" dur="1.8s" repeatCount="indefinite" />
           </circle>
           <circle cx="80" cy="204" r="2.4" fill={accent} style={{ animation: 'blink 2.4s infinite' }} />
           <circle cx="80" cy="26" r="2.2" fill="#fff" style={{ animation: 'blink 1.3s infinite' }} />

@@ -1,4 +1,5 @@
 import { AppProvider } from './store/AppContext'
+import Intro from './components/Intro'
 import ScrollProgress from './components/ScrollProgress'
 import Navbar from './components/Navbar'
 import Hero from './components/Hero'
@@ -20,6 +21,7 @@ import BookingModal from './components/BookingModal'
 export default function App() {
   return (
     <AppProvider>
+      <Intro />
       <div className="grain relative min-h-screen bg-black text-white">
         <ScrollProgress />
         <Navbar />
