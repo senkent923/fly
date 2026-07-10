@@ -20,14 +20,14 @@ const AIRPORTS = [
 // Overlay canvas matches the world-map image aspect (626×417).
 const W = 1000
 const H = 666
-// Geographic bounds of the reference image (calibrated to the artwork).
-const LON_MIN = -169
-const LON_MAX = 191
-const LAT_MAX = 83.5
-const LAT_MIN = -58
+// Calibrated to the artwork: the land silhouette occupies these fractions of
+// the image (measured), and those edges correspond to the extreme lands —
+// Greenland (N) / Cape Horn (S) / the Pacific rim (W & E).
+const IMG = { left: 0.11, right: 0.909, top: 0.137, bot: 0.859 }
+const GEO = { west: -168, east: 190, north: 83.6, south: -55.9 }
 const proj = (lon, lat) => [
-  ((lon - LON_MIN) / (LON_MAX - LON_MIN)) * W,
-  ((LAT_MAX - lat) / (LAT_MAX - LAT_MIN)) * H,
+  (IMG.left + ((lon - GEO.west) / (GEO.east - GEO.west)) * (IMG.right - IMG.left)) * W,
+  (IMG.top + ((GEO.north - lat) / (GEO.north - GEO.south)) * (IMG.bot - IMG.top)) * H,
 ]
 
 const hub = AIRPORTS.find((a) => a.hub)
