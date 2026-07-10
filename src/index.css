@@ -426,6 +426,14 @@ body {
   }
 }
 
+/* On phones the plane is small and easily missed — scale it up so the
+   overhead flight animation is clearly visible. */
+@media (max-width: 809.98px) {
+  .sky-plane {
+    --fly-scale: 1.15 !important;
+  }
+}
+
 /* ---------- Extra utilities ---------- */
 .float-slow {
   animation: floatY 6s ease-in-out infinite;

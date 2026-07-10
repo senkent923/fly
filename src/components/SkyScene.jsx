@@ -98,7 +98,7 @@ function Sunset() {
 function Overhead({ path = 'flyDiag', rot, scale = 1, dur, delay = '0s', left = '0%', top = '0', trail, lit, accent = '#F598F2', silhouette }) {
   return (
     <div
-      className="absolute left-0 will-change-transform"
+      className="sky-plane absolute left-0 will-change-transform"
       style={{
         top,
         left,

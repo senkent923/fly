@@ -8,8 +8,10 @@ import RouteMap from './components/RouteMap'
 import Destinations from './components/Destinations'
 import Cabins from './components/Cabins'
 import Fleet from './components/Fleet'
+import EmptyLegs from './components/EmptyLegs'
 import BookCta from './components/BookCta'
 import BookingWidget from './components/BookingWidget'
+import Faq from './components/Faq'
 import Footer from './components/Footer'
 import AuthModal from './components/AuthModal'
 import AccountModal from './components/AccountModal'
@@ -29,8 +31,10 @@ export default function App() {
           <Destinations />
           <Cabins />
           <Fleet />
+          <EmptyLegs />
           <BookCta />
           <BookingWidget />
+          <Faq />
         </main>
         <Footer />
 
