@@ -8,7 +8,6 @@ import RouteMap from './components/RouteMap'
 import Destinations from './components/Destinations'
 import Cabins from './components/Cabins'
 import Fleet from './components/Fleet'
-import AirportMap from './components/AirportMap'
 import BookCta from './components/BookCta'
 import BookingWidget from './components/BookingWidget'
 import Footer from './components/Footer'
@@ -30,7 +29,6 @@ export default function App() {
           <Destinations />
           <Cabins />
           <Fleet />
-          <AirportMap />
           <BookCta />
           <BookingWidget />
         </main>
