@@ -20,13 +20,14 @@ const POOL = [
   ['AER', 'SVO'], ['DXB', 'IST'], ['LED', 'LHR'],
 ]
 
-// Correct chronological status: check-in → boarding → departing → in flight.
+// Status by minutes-until-departure — the real lifecycle of a flight:
+// scheduled → check-in → boarding → departing → airborne.
 function statusFor(mins, delayed) {
-  if (delayed) return { label: 'Задержка', tone: 'text-[#ffb15a] bg-[#ffb15a]/12' }
-  if (mins > 60) return { label: 'По расписанию', tone: 'text-white/55 bg-white/5' }
-  if (mins > 20) return { label: 'Регистрация', tone: 'text-white bg-white/10' }
-  if (mins > 3) return { label: 'Посадка', tone: 'text-[var(--accent)] bg-[var(--accent)]/12' }
-  if (mins > -12) return { label: 'Вылет', tone: 'text-[#49e07a] bg-[#49e07a]/12' }
+  if (delayed && mins > -15) return { label: 'Задержка', tone: 'text-[#ffb15a] bg-[#ffb15a]/12' }
+  if (mins > 90) return { label: 'По расписанию', tone: 'text-white/55 bg-white/5' }
+  if (mins > 30) return { label: 'Регистрация', tone: 'text-white bg-white/10' }
+  if (mins > 5) return { label: 'Посадка', tone: 'text-[var(--accent)] bg-[var(--accent)]/12' }
+  if (mins > -15) return { label: 'Вылет', tone: 'text-[#49e07a] bg-[#49e07a]/12' }
   return { label: 'В пути', tone: 'text-[#49e07a] bg-[#49e07a]/12' }
 }
 
@@ -59,30 +60,42 @@ export default function LiveBoard() {
   const [nowTs, setNowTs] = useState(Date.now())
   const [flights, setFlights] = useState(() => {
     const now = Date.now()
-    return [-35, -12, 10, 33, 60, 90, 126, 160].map((o) => {
+    // one just departing, the rest upcoming at ~15–40 min gaps
+    return [-6, 10, 26, 45, 70, 100, 135, 175].map((o) => {
       seq.current += 7
       return buildFlight(seq.current, now + o * 60000)
     })
   })
 
   useEffect(() => {
-    // planes in air + clock (statuses evolve)
-    const tick = setInterval(() => {
-      setInAir((n) => Math.min(34, Math.max(17, n + (Math.floor(Math.random() * 3) - 1))))
-      setNowTs(Date.now())
-    }, 3200)
-    // rotate the board: drop the earliest flight, schedule a new one
-    const rotate = setInterval(() => {
+    // clock ticks every 20s so statuses evolve by real flight time; once a
+    // flight has been airborne ~20 min it leaves the board and a new one
+    // is scheduled at the bottom.
+    const clock = setInterval(() => {
+      const now = Date.now()
+      setNowTs(now)
       setFlights((prev) => {
-        const lastDep = prev[prev.length - 1].dep
-        seq.current += 7
-        const gap = (28 + Math.floor(Math.random() * 20)) * 60000
-        return [...prev.slice(1), buildFlight(seq.current, lastDep + gap)]
+        let list = prev
+        let changed = false
+        while (list.length && now - list[0].dep > 20 * 60000) {
+          const lastDep = list[list.length - 1].dep
+          seq.current += 7
+          const gap = (24 + Math.floor(Math.random() * 18)) * 60000
+          list = [...list.slice(1), buildFlight(seq.current, lastDep + gap)]
+          changed = true
+        }
+        return changed ? list : prev
       })
-    }, 11000)
+    }, 20000)
+
+    // planes in the air drift slowly — a small change every ~12 minutes
+    const air = setInterval(() => {
+      setInAir((n) => Math.min(34, Math.max(17, n + (Math.floor(Math.random() * 3) - 1))))
+    }, 12 * 60000)
+
     return () => {
-      clearInterval(tick)
-      clearInterval(rotate)
+      clearInterval(clock)
+      clearInterval(air)
     }
   }, [])
 
