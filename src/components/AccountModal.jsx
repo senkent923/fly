@@ -19,8 +19,13 @@ export default function AccountModal() {
             {(user.name || user.email)[0].toUpperCase()}
           </span>
           <div>
-            <div className="font-medium">{user.name || 'Гость'}</div>
-            <div className="text-sm text-white/45">{user.email}</div>
+            <div className="font-medium">
+              {[user.lastName, user.firstName, user.middleName].filter(Boolean).join(' ') || user.name || 'Гость'}
+            </div>
+            <div className="text-sm text-white/45">
+              {user.email}
+              {user.age ? ` · ${user.age} лет` : ''}
+            </div>
           </div>
         </div>
         <button

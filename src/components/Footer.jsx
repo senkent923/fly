@@ -1,5 +1,8 @@
+import { useApp } from '../store/AppContext'
+
 export default function Footer() {
   const year = new Date().getFullYear()
+  const { openPrivacy } = useApp()
   return (
     <footer
       id="journal"
@@ -28,7 +31,12 @@ export default function Footer() {
         </div>
         <div className="flex items-center justify-between border-t border-white/10 pt-6 text-xs font-medium uppercase tracking-[0.14em] text-white/40 mobile:flex-col mobile:items-start mobile:gap-2">
           <span>© {year} AETHER — частное небо</span>
-          <span>Углеродно-нейтрально · Хаб Москва</span>
+          <div className="flex items-center gap-5">
+            <button type="button" onClick={openPrivacy} className="uppercase tracking-[0.14em] transition-colors hover:text-white">
+              Политика конфиденциальности
+            </button>
+            <span>Хаб Москва</span>
+          </div>
         </div>
       </div>
     </footer>

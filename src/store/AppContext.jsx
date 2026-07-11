@@ -25,6 +25,8 @@ export function AppProvider({ children }) {
   const [modal, setModal] = useState(null)
   // draft passed into the booking flow: { fromCode, toCode, date, pax }
   const [bookingDraft, setBookingDraft] = useState(null)
+  // privacy policy overlay (can appear over any modal)
+  const [privacy, setPrivacy] = useState(false)
 
   useEffect(() => {
     writeUsers(users)
@@ -38,16 +40,29 @@ export function AppProvider({ children }) {
   const user = email ? users[email] || null : null
 
   const register = useCallback(
-    ({ email: e, password, name }) => {
+    ({ email: e, password, lastName, firstName, middleName, age }) => {
       const key = e.trim().toLowerCase()
       const current = readUsers()
       if (current[key]) return { ok: false, error: 'Аккаунт с такой почтой уже существует' }
-      const next = { ...current, [key]: { email: key, password, name: name || '', bookings: [] } }
+      const name = [lastName, firstName].filter(Boolean).join(' ')
+      const next = {
+        ...current,
+        [key]: { email: key, password, lastName, firstName, middleName, age, name, passport: null, bookings: [] },
+      }
       setUsers(next)
       setEmail(key)
       return { ok: true }
     },
     [],
+  )
+
+  // remember passport details on the profile for future prefill
+  const savePassport = useCallback(
+    (passport) => {
+      if (!email) return
+      setUsers((prev) => (prev[email] ? { ...prev, [email]: { ...prev[email], passport } } : prev))
+    },
+    [email],
   )
 
   const login = useCallback(({ email: e, password }) => {
@@ -84,6 +99,8 @@ export function AppProvider({ children }) {
     setBookingDraft(draft)
     setModal('booking')
   }, [])
+  const openPrivacy = useCallback(() => setPrivacy(true), [])
+  const closePrivacy = useCallback(() => setPrivacy(false), [])
 
   const value = useMemo(
     () => ({
@@ -91,16 +108,20 @@ export function AppProvider({ children }) {
       isAuthed: !!user,
       modal,
       bookingDraft,
+      privacy,
       register,
       login,
       logout,
       addBooking,
+      savePassport,
       openAuth,
       openAccount,
       closeModal,
       startBooking,
+      openPrivacy,
+      closePrivacy,
     }),
-    [user, modal, bookingDraft, register, login, logout, addBooking, openAuth, openAccount, closeModal, startBooking],
+    [user, modal, bookingDraft, privacy, register, login, logout, addBooking, savePassport, openAuth, openAccount, closeModal, startBooking, openPrivacy, closePrivacy],
   )
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>

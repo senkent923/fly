@@ -1,70 +1,89 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { ArrowRight } from 'lucide-react'
 import { useReveal } from '../hooks/useReveal'
 import { useApp } from '../store/AppContext'
 import { findAirport, distanceKm, flightDuration, priceFor, formatRub } from '../data/airports'
 
 const hhmm = (ts) =>
-  new Intl.DateTimeFormat('ru-RU', { hour: '2-digit', minute: '2-digit', hour12: false }).format(new Date(ts))
+  new Intl.DateTimeFormat('ru-RU', {
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false,
+    timeZone: 'Europe/Moscow',
+  }).format(new Date(ts))
 
-// Scheduled flights; departure offsets are minutes relative to load time.
-const SCHEDULE = [
-  { from: 'SVO', to: 'DXB', off: -38 },
-  { from: 'LED', to: 'CDG', off: -12 },
-  { from: 'SVO', to: 'AER', off: 9 },
-  { from: 'DXB', to: 'MLE', off: 34 },
-  { from: 'IST', to: 'SVO', off: 63 },
-  { from: 'HND', to: 'DPS', off: 92 },
-  { from: 'JFK', to: 'LHR', off: 128 },
-  { from: 'SVO', to: 'LED', off: 164 },
+// Pool of routes (all codes exist in AIRPORTS); flights are drawn from it.
+const POOL = [
+  ['SVO', 'DXB'], ['LED', 'CDG'], ['SVO', 'AER'], ['DXB', 'MLE'], ['IST', 'SVO'],
+  ['HND', 'DPS'], ['JFK', 'LHR'], ['SVO', 'LED'], ['SVO', 'IST'], ['CDG', 'SVO'],
+  ['SVX', 'SVO'], ['KZN', 'SVO'], ['LHR', 'JFK'], ['MLE', 'DXB'], ['SVO', 'BKK'],
+  ['AER', 'SVO'], ['DXB', 'IST'], ['LED', 'LHR'],
 ]
 
-function statusFor(minsToDep, delayed) {
+// Correct chronological status: check-in → boarding → departing → in flight.
+function statusFor(mins, delayed) {
   if (delayed) return { label: 'Задержка', tone: 'text-[#ffb15a] bg-[#ffb15a]/12' }
-  if (minsToDep <= -20) return { label: 'В пути', tone: 'text-[#49e07a] bg-[#49e07a]/12' }
-  if (minsToDep <= 5) return { label: 'Посадка', tone: 'text-[var(--accent)] bg-[var(--accent)]/12' }
-  if (minsToDep <= 35) return { label: 'Регистрация', tone: 'text-white bg-white/10' }
-  return { label: 'По расписанию', tone: 'text-white/55 bg-white/5' }
+  if (mins > 60) return { label: 'По расписанию', tone: 'text-white/55 bg-white/5' }
+  if (mins > 20) return { label: 'Регистрация', tone: 'text-white bg-white/10' }
+  if (mins > 3) return { label: 'Посадка', tone: 'text-[var(--accent)] bg-[var(--accent)]/12' }
+  if (mins > -12) return { label: 'Вылет', tone: 'text-[#49e07a] bg-[#49e07a]/12' }
+  return { label: 'В пути', tone: 'text-[#49e07a] bg-[#49e07a]/12' }
+}
+
+function buildFlight(seq, dep) {
+  const [from, to] = POOL[Math.floor(Math.random() * POOL.length)]
+  const a = findAirport(from)
+  const b = findAirport(to)
+  const km = Math.round(distanceKm(a, b))
+  const dur = flightDuration(km)
+  return {
+    no: 'AE' + seq,
+    from,
+    to,
+    fromCity: a.city,
+    toCity: b.city,
+    dep,
+    arr: dep + dur.hours * 3600000,
+    durLabel: dur.label,
+    price: priceFor(km, 'business', 1),
+    delayed: Math.random() < 0.12,
+  }
 }
 
 export default function LiveBoard() {
   const [ref, visible] = useReveal(0.2)
   const { startBooking } = useApp()
-  const base = useRef(Date.now())
+  const seq = useRef(100)
 
   const [inAir, setInAir] = useState(26)
   const [nowTs, setNowTs] = useState(Date.now())
+  const [flights, setFlights] = useState(() => {
+    const now = Date.now()
+    return [-35, -12, 10, 33, 60, 90, 126, 160].map((o) => {
+      seq.current += 7
+      return buildFlight(seq.current, now + o * 60000)
+    })
+  })
 
-  // live pulse: planes in the air random-walk within a realistic range;
-  // clock advances so board statuses evolve.
   useEffect(() => {
-    const id = setInterval(() => {
+    // planes in air + clock (statuses evolve)
+    const tick = setInterval(() => {
       setInAir((n) => Math.min(34, Math.max(17, n + (Math.floor(Math.random() * 3) - 1))))
       setNowTs(Date.now())
     }, 3200)
-    return () => clearInterval(id)
-  }, [])
-
-  const flights = useMemo(() => {
-    return SCHEDULE.map((s, i) => {
-      const a = findAirport(s.from)
-      const b = findAirport(s.to)
-      const km = Math.round(distanceKm(a, b))
-      const dur = flightDuration(km)
-      const dep = base.current + s.off * 60000
-      const arr = dep + dur.hours * 3600000
-      return {
-        ...s,
-        no: 'AE' + (100 + i * 7),
-        fromCity: a.city,
-        toCity: b.city,
-        dep,
-        arr,
-        durLabel: dur.label,
-        price: priceFor(km, 'business', 1),
-        delayed: i === 3,
-      }
-    })
+    // rotate the board: drop the earliest flight, schedule a new one
+    const rotate = setInterval(() => {
+      setFlights((prev) => {
+        const lastDep = prev[prev.length - 1].dep
+        seq.current += 7
+        const gap = (28 + Math.floor(Math.random() * 20)) * 60000
+        return [...prev.slice(1), buildFlight(seq.current, lastDep + gap)]
+      })
+    }, 11000)
+    return () => {
+      clearInterval(tick)
+      clearInterval(rotate)
+    }
   }, [])
 
   const todayCount = 48
@@ -81,7 +100,6 @@ export default function LiveBoard() {
               В небе <span className="text-white/45">прямо сейчас.</span>
             </h2>
           </div>
-          {/* live counters */}
           <div className="flex gap-10 mobile:gap-8">
             <div>
               <div className="flex items-center gap-2">
@@ -101,10 +119,8 @@ export default function LiveBoard() {
           </div>
         </div>
 
-        {/* board */}
         <div className="overflow-hidden rounded-2xl border border-white/10">
-          {/* header */}
-          <div className="grid grid-cols-[90px_1.6fr_90px_90px_100px_120px_130px] items-center gap-4 border-b border-white/10 bg-white/[0.03] px-6 py-3 text-[10px] font-medium uppercase tracking-[0.16em] text-white/40 mobile:hidden">
+          <div className="grid grid-cols-[90px_1.6fr_90px_90px_100px_130px_130px] items-center gap-4 border-b border-white/10 bg-white/[0.03] px-6 py-3 text-[10px] font-medium uppercase tracking-[0.16em] text-white/40 mobile:hidden">
             <span>Рейс</span>
             <span>Маршрут</span>
             <span>Вылет</span>
@@ -122,7 +138,7 @@ export default function LiveBoard() {
                 key={f.no}
                 type="button"
                 onClick={() => startBooking({ fromCode: f.from, toCode: f.to, date: new Date(f.dep).toISOString().slice(0, 10), pax: 1, round: false })}
-                className="group grid w-full grid-cols-[90px_1.6fr_90px_90px_100px_120px_130px] items-center gap-4 border-b border-white/8 px-6 py-4 text-left transition-colors last:border-b-0 hover:bg-white/[0.03] mobile:grid-cols-2 mobile:gap-y-1 mobile:px-4"
+                className="group grid w-full grid-cols-[90px_1.6fr_90px_90px_100px_130px_130px] items-center gap-4 border-b border-white/8 px-6 py-4 text-left transition-colors last:border-b-0 hover:bg-white/[0.03] mobile:grid-cols-2 mobile:gap-y-1 mobile:px-4"
               >
                 <span className="font-mono text-sm text-white/50 mobile:order-1">{f.no}</span>
                 <span className="flex items-center gap-2 text-base font-medium mobile:order-3 mobile:col-span-2 mobile:text-sm">
@@ -143,7 +159,7 @@ export default function LiveBoard() {
           })}
         </div>
         <p className="mt-4 text-xs text-white/35">
-          Время и цены рассчитываются автоматически по расстоянию. Нажмите на рейс, чтобы забронировать.
+          Время в пути, время прилёта и цены рассчитываются автоматически по расстоянию. Нажмите на рейс, чтобы забронировать.
         </p>
       </div>
     </section>

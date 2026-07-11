@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react'
-import { Plane, Check, Mail, Lock } from 'lucide-react'
+import { Plane, Check } from 'lucide-react'
 import Modal from './Modal'
+import AuthForm from './AuthForm'
 import { useApp } from '../store/AppContext'
 import {
   findAirport,
@@ -12,7 +13,7 @@ import {
 } from '../data/airports'
 
 export default function BookingModal() {
-  const { modal, closeModal, bookingDraft, isAuthed, user, login, register, addBooking } = useApp()
+  const { modal, closeModal, bookingDraft, isAuthed, user, addBooking } = useApp()
   const open = modal === 'booking'
 
   const [step, setStep] = useState('fares')
@@ -43,7 +44,7 @@ export default function BookingModal() {
     setStep('checkout')
   }
 
-  const onPaid = (email) => {
+  const onPaid = (email, passport) => {
     const cls = CLASSES.find((c) => c.id === classId)
     const total = priceFor(km, classId, pax, round)
     const booking = {
@@ -59,6 +60,7 @@ export default function BookingModal() {
       classLabel: cls.label,
       price: total,
       email,
+      passport: passport?.series || null,
       status: 'Оплачено',
       createdAt: Date.now(),
     }
@@ -114,8 +116,6 @@ export default function BookingModal() {
           isAuthed={isAuthed}
           user={user}
           onBack={() => setStep('fares')}
-          onLogin={login}
-          onRegister={register}
           onPaid={onPaid}
         />
       )}
@@ -163,25 +163,26 @@ function Endpoint({ code, city, right }) {
   )
 }
 
-function Checkout({ priceLabel, classLabel, isAuthed, user, onBack, onLogin, onRegister, onPaid }) {
-  const [mode, setMode] = useState('login')
-  const [auth, setAuth] = useState({ name: '', email: '', password: '' })
-  const [authErr, setAuthErr] = useState('')
+function Checkout({ priceLabel, classLabel, isAuthed, user, onBack, onPaid }) {
+  const { savePassport } = useApp()
   const [card, setCard] = useState({ number: '', exp: '', cvc: '', name: '' })
-
-  const doAuth = (e) => {
-    e.preventDefault()
-    setAuthErr('')
-    if (!auth.email || !auth.password) return setAuthErr('Заполните почту и пароль')
-    const res = mode === 'login' ? onLogin(auth) : onRegister(auth)
-    if (!res.ok) setAuthErr(res.error)
-  }
+  const [passport, setPassport] = useState({
+    series: user?.passport?.series || '',
+    dob: user?.passport?.dob || '',
+  })
+  const [err, setErr] = useState('')
 
   const pay = (e) => {
     e.preventDefault()
-    onPaid(user?.email)
+    setErr('')
+    if (passport.series.replace(/\s/g, '').length !== 10)
+      return setErr('Введите серию и номер паспорта (10 цифр)')
+    if (!passport.dob) return setErr('Укажите дату рождения')
+    savePassport(passport)
+    onPaid(user?.email, passport)
   }
 
+  // not signed in — full login / registration first
   if (!isAuthed) {
     return (
       <div className="mt-6">
@@ -189,34 +190,7 @@ function Checkout({ priceLabel, classLabel, isAuthed, user, onBack, onLogin, onR
           Войдите или создайте аккаунт — билет сохранится в личном кабинете, а
           посадочный талон придёт на вашу почту.
         </div>
-        <div className="mb-5 flex rounded-full border border-white/10 p-1 text-sm">
-          {[['login', 'Войти'], ['register', 'Регистрация']].map(([id, l]) => (
-            <button
-              key={id}
-              type="button"
-              onClick={() => setMode(id)}
-              className={`flex-1 rounded-full py-2 font-medium transition-colors ${
-                mode === id ? 'bg-white text-black' : 'text-white/60'
-              }`}
-            >
-              {l}
-            </button>
-          ))}
-        </div>
-        <form onSubmit={doAuth} className="flex flex-col gap-3">
-          {mode === 'register' && (
-            <Input icon={null} placeholder="Имя" value={auth.name}
-              onChange={(e) => setAuth({ ...auth, name: e.target.value })} />
-          )}
-          <Input icon={Mail} type="email" placeholder="Почта" value={auth.email}
-            onChange={(e) => setAuth({ ...auth, email: e.target.value })} />
-          <Input icon={Lock} type="password" placeholder="Пароль" value={auth.password}
-            onChange={(e) => setAuth({ ...auth, password: e.target.value })} />
-          {authErr && <p className="text-sm text-[#ff9a9a]">{authErr}</p>}
-          <button type="submit" className="fill-btn mt-1 rounded-full border border-white py-3 text-sm font-medium">
-            Продолжить
-          </button>
-        </form>
+        <AuthForm />
         <button onClick={onBack} className="mt-4 text-xs text-white/45 hover:text-white">
           ← назад к тарифам
         </button>
@@ -234,6 +208,29 @@ function Checkout({ priceLabel, classLabel, isAuthed, user, onBack, onLogin, onR
         <div className="text-2xl font-medium tracking-[-0.5px]">{priceLabel}</div>
       </div>
 
+      {/* passport data */}
+      <div className="flex flex-col gap-3">
+        <span className="text-[11px] font-medium uppercase tracking-[0.16em] text-white/45">
+          Данные паспорта
+        </span>
+        <Input
+          placeholder="Серия и номер (1234 567890)"
+          inputMode="numeric"
+          value={passport.series}
+          maxLength={11}
+          onChange={(e) => setPassport({ ...passport, series: formatPassport(e.target.value) })}
+        />
+        <label className="flex flex-col gap-1.5">
+          <span className="text-[11px] text-white/40">Дата рождения</span>
+          <Input
+            type="date"
+            value={passport.dob}
+            onChange={(e) => setPassport({ ...passport, dob: e.target.value })}
+          />
+        </label>
+      </div>
+
+      {/* card */}
       <div className="flex flex-col gap-3">
         <span className="text-[11px] font-medium uppercase tracking-[0.16em] text-white/45">
           Оплата картой (демо)
@@ -250,6 +247,8 @@ function Checkout({ priceLabel, classLabel, isAuthed, user, onBack, onLogin, onR
           onChange={(e) => setCard({ ...card, name: e.target.value })} />
       </div>
 
+      {err && <p className="text-sm text-[#ff9a9a]">{err}</p>}
+
       <button type="submit" className="fill-btn rounded-full border border-white py-3.5 text-sm font-medium tracking-[0.02em]">
         Оплатить {priceLabel}
       </button>
@@ -261,6 +260,11 @@ function Checkout({ priceLabel, classLabel, isAuthed, user, onBack, onLogin, onR
       </p>
     </form>
   )
+}
+
+function formatPassport(v) {
+  const d = v.replace(/\D/g, '').slice(0, 10)
+  return d.length > 4 ? `${d.slice(0, 4)} ${d.slice(4)}` : d
 }
 
 function Success({ order, onClose }) {
