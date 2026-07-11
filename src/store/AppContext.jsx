@@ -27,10 +27,22 @@ export function AppProvider({ children }) {
   const [bookingDraft, setBookingDraft] = useState(null)
   // privacy policy overlay (can appear over any modal)
   const [privacy, setPrivacy] = useState(false)
+  // admin panel overlay (demo)
+  const [admin, setAdmin] = useState(false)
 
   useEffect(() => {
     writeUsers(users)
   }, [users])
+
+  // open the admin panel via the #admin hash too
+  useEffect(() => {
+    const check = () => {
+      if (window.location.hash === '#admin') setAdmin(true)
+    }
+    check()
+    window.addEventListener('hashchange', check)
+    return () => window.removeEventListener('hashchange', check)
+  }, [])
 
   useEffect(() => {
     if (email) localStorage.setItem(SESSION_KEY, email)
@@ -101,14 +113,21 @@ export function AppProvider({ children }) {
   }, [])
   const openPrivacy = useCallback(() => setPrivacy(true), [])
   const closePrivacy = useCallback(() => setPrivacy(false), [])
+  const openAdmin = useCallback(() => setAdmin(true), [])
+  const closeAdmin = useCallback(() => {
+    setAdmin(false)
+    if (window.location.hash === '#admin') history.replaceState(null, '', window.location.pathname)
+  }, [])
 
   const value = useMemo(
     () => ({
       user,
       isAuthed: !!user,
+      allUsers: users,
       modal,
       bookingDraft,
       privacy,
+      admin,
       register,
       login,
       logout,
@@ -120,8 +139,10 @@ export function AppProvider({ children }) {
       startBooking,
       openPrivacy,
       closePrivacy,
+      openAdmin,
+      closeAdmin,
     }),
-    [user, modal, bookingDraft, privacy, register, login, logout, addBooking, savePassport, openAuth, openAccount, closeModal, startBooking, openPrivacy, closePrivacy],
+    [user, users, modal, bookingDraft, privacy, admin, register, login, logout, addBooking, savePassport, openAuth, openAccount, closeModal, startBooking, openPrivacy, closePrivacy, openAdmin, closeAdmin],
   )
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>

@@ -18,6 +18,7 @@ import AuthModal from './components/AuthModal'
 import AccountModal from './components/AccountModal'
 import BookingModal from './components/BookingModal'
 import PrivacyModal from './components/PrivacyModal'
+import AdminPanel from './components/AdminPanel'
 
 export default function App() {
   return (
@@ -46,6 +47,7 @@ export default function App() {
         <AccountModal />
         <BookingModal />
         <PrivacyModal />
+        <AdminPanel />
       </div>
     </AppProvider>
   )
