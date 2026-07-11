@@ -2,7 +2,7 @@ import { useApp } from '../store/AppContext'
 
 export default function Footer() {
   const year = new Date().getFullYear()
-  const { openPrivacy, openAdmin } = useApp()
+  const { openPrivacy } = useApp()
   return (
     <footer
       id="journal"
@@ -35,9 +35,7 @@ export default function Footer() {
             <button type="button" onClick={openPrivacy} className="uppercase tracking-[0.14em] transition-colors hover:text-white">
               Политика конфиденциальности
             </button>
-            <button type="button" onClick={openAdmin} className="uppercase tracking-[0.14em] transition-colors hover:text-white">
-              Админ-панель
-            </button>
+            <span>Хаб Москва</span>
           </div>
         </div>
       </div>

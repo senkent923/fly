@@ -1,7 +1,7 @@
 import { useCountUp } from '../hooks/useCountUp'
 
 const STATS = [
-  { end: 42, suffix: '', label: 'направления по миру' },
+  { end: 14, suffix: '', label: 'направления по миру' },
   { end: 9, suffix: ' мин', label: 'от входа до кресла' },
   { end: 99.4, decimals: 1, suffix: '%', label: 'рейсов вовремя' },
   { end: 100, suffix: '%', label: 'углеродная компенсация' },

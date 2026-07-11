@@ -1,6 +1,9 @@
+import { useEffect, useState } from 'react'
 import { useApp } from '../store/AppContext'
 import { formatRub } from '../data/airports'
-import { X } from 'lucide-react'
+import { X, Lock } from 'lucide-react'
+
+const ADMIN_PASSWORD = 'aether2026'
 
 const dt = (ts) =>
   new Intl.DateTimeFormat('ru-RU', {
@@ -12,7 +15,60 @@ const dt = (ts) =>
 
 export default function AdminPanel() {
   const { admin, closeAdmin, allUsers } = useApp()
+  const [unlocked, setUnlocked] = useState(false)
+  const [pw, setPw] = useState('')
+  const [err, setErr] = useState('')
+
+  useEffect(() => {
+    if (!admin) {
+      setUnlocked(false)
+      setPw('')
+      setErr('')
+    }
+  }, [admin])
+
   if (!admin) return null
+
+  if (!unlocked) {
+    const submit = (e) => {
+      e.preventDefault()
+      if (pw === ADMIN_PASSWORD) setUnlocked(true)
+      else setErr('Неверный пароль')
+    }
+    return (
+      <div className="fixed inset-0 z-[100] flex items-center justify-center bg-[#070709] p-4">
+        <form onSubmit={submit} className="w-full max-w-[380px] rounded-3xl border border-white/12 bg-[#0b0b0d] p-8">
+          <div className="mb-6 flex items-center gap-3">
+            <span className="flex h-10 w-10 items-center justify-center rounded-full bg-[var(--accent)]/15 text-[var(--accent)]">
+              <Lock size={18} />
+            </span>
+            <div>
+              <div className="text-xs font-medium uppercase tracking-[0.2em] text-[var(--accent)]">AETHER</div>
+              <div className="text-lg font-medium">Админ-панель</div>
+            </div>
+          </div>
+          <input
+            type="password"
+            autoFocus
+            value={pw}
+            onChange={(e) => {
+              setPw(e.target.value)
+              setErr('')
+            }}
+            placeholder="Пароль"
+            className="w-full rounded-xl border border-white/12 bg-white/[0.03] px-4 py-3 text-sm text-white outline-none transition-colors placeholder:text-white/30 focus:border-[var(--accent)]"
+          />
+          {err && <p className="mt-3 text-sm text-[#ff9a9a]">{err}</p>}
+          <button type="submit" className="fill-btn mt-5 w-full rounded-full border border-white py-3 text-sm font-medium">
+            Войти
+          </button>
+          <button type="button" onClick={closeAdmin} className="mt-4 w-full text-center text-xs text-white/40 hover:text-white">
+            ← на сайт
+          </button>
+        </form>
+      </div>
+    )
+  }
 
   const users = Object.values(allUsers || {})
   const orders = users
